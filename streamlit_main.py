@@ -1,3 +1,27 @@
+"""
+streamlit_main.py
+Azure Consumption
+    sorted(Path("/Users/shaun/projects/mis/data").glob("*2024-*.xlsx"))
+    /Users/shaun/projects/mis/data/Jan to Dec 2023.xlsx
+
+01_Projected_Revenue.py
+    /Users/shaun/Documents/Billing v3.0.xlsx   
+        sheet_name="RateCard"
+        sheet_name="Holidays"
+    /Users/shaun/Documents/dropzone/BAI Collections as of date.xlsx
+        sheet_name="Raw"
+
+02_Lost_Opportunities.py
+    /Users/shaun/Documents/Billing v3.0.xlsx   
+        sheet_name="RateCard"
+
+05_Xamun_Resources.py
+    /Users/shaun/eod/BAI EOD Log Report V2.xlsx
+    /Users/shaun/Documents/Billing v3.0.xlsx"
+        sheet_name="employees"
+        
+"""
+
 import pandas as pd
 import streamlit as st
 from datetime import datetime
@@ -27,6 +51,60 @@ def load_data():
     df = session.sql("select * from AZURECONSUMPTION").to_pandas()
     session.close()
     return df
+
+
+@st.cache_data
+def load_data2():
+
+    def load_monthly(file):
+        _df = pd.read_excel(
+            file,
+            skiprows=2,
+            usecols=["Category", "Subscription", "Cost", "UsageDate", "Resource Group"],
+            engine="openpyxl",
+            dtype={"Cost": "float16"},
+        )
+
+        # change 'QR Core Production'==>'Beta'; and 'QR Core POC'==>'Production'
+
+        _df.loc[_df.Subscription == "QR Core Production", "Subscription"] = "Beta"
+        _df.loc[_df.Subscription != "Beta", "Subscription"] = "Production"
+        return _df
+
+    arr = sorted(Path("/Users/shaun/projects/mis/data").glob("*2024-*.xlsx"))
+    # arr = sorted(Path("data").glob("Azure Usage*2024-*.xlsx"))
+    arr_df = [load_monthly(el) for el in arr]
+
+    df_since_2023 = pd.read_excel(
+        "/Users/shaun/projects/mis/data/Jan to Dec 2023.xlsx",
+        skiprows=2,
+        usecols=["Category", "Subscription", "Cost", "UsageDate", "Resource Group"],
+        engine="openpyxl",
+        dtype={"Cost": "float16"},
+    )
+
+    # change 'QR Core Production'==>'Production'; and 'QR Core POC'==>'Beta'
+    df_since_2023.loc[
+        df_since_2023.Subscription == "QR Core Production", "Subscription"
+    ] = "Production"
+    df_since_2023.loc[df_since_2023.Subscription != "Production", "Subscription"] = (
+        "Beta"
+    )
+
+    arr_df.append(df_since_2023)  ## add 2023
+
+    _df = pd.concat(arr_df)
+    _df["Category"] = _df["Category"].astype("category")
+    _df = _df.rename(
+        columns={
+            "Category": "CATEGORY",
+            "Subscription": "SUBSCRIPTION",
+            "Cost": "COST",
+            "UsageDate": "USAGEDATE",
+            "Resource Group": "RESOURCEGROUP",
+        }
+    )
+    return _df
 
 
 def plot_the_chart_combined(df):
@@ -178,15 +256,12 @@ def main():
     st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
     st.title("QuickReach Azure Consumption")
 
-    df_since_2023 = load_data()
-
-    def filter_resource_grp_monthly(df):
-        return df.loc[df["RESOURCE GROUP"].isin(selected)]
+    df_since_2023 = load_data2()
 
     df_since_2023["USAGEDATE"] = df_since_2023["USAGEDATE"].astype("datetime64[ns]")
     df_since_2023["REPORTDATE"] = df_since_2023["USAGEDATE"].dt.strftime("%Y-%m")
 
-    arr_report_dates = df_since_2023.sort_values(
+    arr_desc_report_dates = df_since_2023.sort_values(
         ["USAGEDATE"], ascending=False
     ).REPORTDATE.unique()
 
@@ -194,6 +269,11 @@ def main():
 
     azure_container = st.container()
     with azure_container:
+        ##########################################
+        #
+        #   filter out unwanted Resource Groups
+        #
+        ##########################################
         selected = st.sidebar.multiselect(
             label="Resource Groups",
             options=lst,  # default=lst
@@ -203,11 +283,6 @@ def main():
             df_since_2023 = df_since_2023.loc[
                 df_since_2023["RESOURCEGROUP"].isin(selected)
             ]
-            df_month_0 = filter_resource_grp_monthly(df_month_0)
-            df_month_1 = filter_resource_grp_monthly(df_month_1)
-            df_month_2 = filter_resource_grp_monthly(df_month_2)
-            df_month_3 = filter_resource_grp_monthly(df_month_3)
-            df_month_4 = filter_resource_grp_monthly(df_month_4)
 
         # ---------------------------------------------
         #
@@ -272,11 +347,11 @@ def main():
         # ---------------------------------------------
         # plot_the_chart_combined(
         #     df_since_2023.loc[
-        #         (df_since_2023.REPORTDATE == arr_report_dates[0])
+        #         (df_since_2023.REPORTDATE == arr_desc_report_dates[0])
         #     ].reset_index(),
         # )
         _df1 = df_since_2023.loc[
-            (df_since_2023.REPORTDATE == arr_report_dates[0])
+            (df_since_2023.REPORTDATE == arr_desc_report_dates[0])
         ].reset_index()
         _df2 = sum_daily_subscription(_df1)
         title = _df2.USAGEDATE[0].strftime("%B")
@@ -301,7 +376,7 @@ def main():
 
                 plot_the_chart_combined(
                     df_since_2023.loc[
-                        (df_since_2023.REPORTDATE == arr_report_dates[i])
+                        (df_since_2023.REPORTDATE == arr_desc_report_dates[i])
                     ].reset_index(),
                 )
 
@@ -390,7 +465,9 @@ def main():
             arr_arr = []
             for i in range(0, 4):
                 arr_arr.append(
-                    df_since_2023.loc[(df_since_2023.REPORTDATE == arr_report_dates[i])]
+                    df_since_2023.loc[
+                        (df_since_2023.REPORTDATE == arr_desc_report_dates[i])
+                    ]
                 )
 
             _df1 = pd.concat(arr_arr)
@@ -489,8 +566,8 @@ def main():
             ###########################################################
 
             # top 6 consumers
-            chart_top_consumers("Beta", df_since_2023, arr_report_dates)
-            chart_top_consumers("Production", df_since_2023, arr_report_dates)
+            chart_top_consumers("Beta", df_since_2023, arr_desc_report_dates)
+            chart_top_consumers("Production", df_since_2023, arr_desc_report_dates)
 
             st.divider()
 
@@ -515,11 +592,15 @@ def main():
         if st.toggle("Show Resource Groups?"):
             ###########################################################
             #
-            #           Show Resource Groups
+            #           Show All Resource Groups
             #
             ###########################################################
+
+            period = st.text_input("Period (YYYY-MM)")
+
             _df = df_since_2023.loc[
-                (df_since_2023.REPORTDATE == arr_report_dates[0])
+                # (df_since_2023.REPORTDATE == arr_desc_report_dates[0])
+                (df_since_2023.REPORTDATE == period)
             ].reset_index()
 
             df = (
@@ -539,6 +620,11 @@ def main():
             fig.update_traces(texttemplate="%{y:.1f}")
             st.plotly_chart(fig, use_container_width=True, height=200)
 
+            ###########################################################
+            #
+            #           Show Individual Resource Groups
+            #
+            ###########################################################
             lst2 = df["RESOURCEGROUP"].unique()
             for rg in lst2:
                 fig = px.histogram(

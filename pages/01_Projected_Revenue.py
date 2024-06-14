@@ -36,7 +36,88 @@ def load_data():
 
     _df_sales = _df_sales.loc[~_df_sales.PROJECT.isnull()]
     _df_sales = _df_sales.loc[
-        ~_df_sales.PROJECT.isin(["PlancareX", "RivingtonX", "iScanX", "RevivaX"])
+        ~_df_sales.PROJECT.isin(
+            ["PlancareX", "RivingtonX", "iScanX", "RevivaX", "TempestX"]
+        )
+    ]
+    return _df_sales, _df_holiday, _df_invoice
+
+
+@st.cache_data
+def load_data2():
+    # sales/rates
+    cols = [
+        "Employee",
+        "Project",
+        "InitRate",
+        "FTE",
+        "Rate",
+        "Period",
+        "Rank",
+        "Level",
+        "Target2",
+        "Billed",
+        "ind_eligibility",
+    ]
+    _df_sales = pd.read_excel(
+        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        sheet_name="RateCard",
+        skiprows=1,
+        usecols=cols,
+        engine="openpyxl",
+    )
+    _df_sales = _df_sales.loc[~_df_sales.Project.isnull()]
+    _df_sales = _df_sales.loc[
+        ~_df_sales.Project.isin(
+            ["PlancareX", "RivingtonX", "iScanX", "RevivaX", "TempestX"]
+        )
+    ]
+    _df_sales = _df_sales.rename(
+        columns={
+            "InitRate": "INIT_RATE",
+            "Target2": "TARGET",
+            "ind_eligibility": "INDIV_ELIGIBILITY",
+            "Employee": "EMPLOYEE",
+            "Project": "PROJECT",
+            "Period": "PERIOD",
+            "Rank": "RANK",
+            "Level": "LEVEL",
+            "Billed": "BILLED",
+        }
+    )
+
+    # holiday
+    _df_holiday = pd.read_excel(
+        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        sheet_name="Holidays",
+        parse_dates=["Date"],
+        date_format="%Y-%m-%d",
+        usecols=["Date", "Holiday"],
+        engine="openpyxl",
+        # skiprows=1,
+    )
+    _df_holiday["HOLIDAY_NAME"] = _df_holiday["Holiday"]
+    _df_holiday["HOLIDAY"] = pd.to_datetime(_df_holiday["Date"])
+    # _df_holiday["YYYYMM"] = _df_holiday["Date"].dt.strftime("%Y-%m")
+    # _df_holiday["Month"] = _df_holiday["Date"].dt.strftime("%B")
+
+    # invoice
+    _df_invoice = pd.read_excel(
+        "/Users/shaun/Documents/dropzone/BAI Collections as of date.xlsx",
+        sheet_name="Raw",
+    )
+    _df_invoice = _df_invoice.drop(["CURRENCY", "STATUS"], axis=1)
+
+    _df_invoice["INV_DATE"] = _df_invoice["INV_DATE"].astype("datetime64[ns]")
+    _df_invoice["DATE_PAID"] = _df_invoice["DATE_PAID"].astype("datetime64[ns]")
+    _df_invoice["INV_YR"] = _df_invoice.apply(lambda x: x["INV_DATE"].year, axis=1)
+    _df_invoice["PAYMENT_YR"] = _df_invoice.apply(lambda x: x["DATE_PAID"].year, axis=1)
+    # _df_invoice = _df_invoice.loc[:4]
+
+    _df_invoice = _df_invoice.loc[
+        (_df_invoice["INV_YR"] == 2024)
+        & (_df_invoice["INV_AMOUNT"] != 33333.34)
+        & (_df_invoice["INV_AMOUNT"] != 70901.49)
     ]
     return _df_sales, _df_holiday, _df_invoice
 
@@ -68,7 +149,7 @@ def main_chart(df):
     )
 
     # highlight the target month (tick/x label)
-    highlighted_bar = "May 2024"
+    highlighted_bar = "June 2024"
     fig.update_traces(
         marker_color=["blue" if x == highlighted_bar else "#99ccff" for x in df.Month],
         textposition="inside",  # Position the text inside the bars
@@ -141,7 +222,6 @@ def billable_hrs(df_rates):
 
 
 def okr(df):
-
     df_inv = df.groupby(["INV_YR", "INV_MON", "TX_TYPE"], as_index=False).agg(
         {"INV_AMOUNT": sum}
     )
@@ -194,10 +274,13 @@ def okr(df):
         "December",
     ]
 
-    arr_columns = [""]
-    for i in range(0, len(df_conc)):
-        arr_columns.append("<b>" + arr_months[i] + "</b>")
+    arr_columns = ["<b>" + arr_months[i] + "</b>" for i in range(0, len(df_conc))]
+    arr_columns.insert(0, "")
     arr_columns.append("<b>To Date</b>")
+    # arr_columns = [""]
+    # for i in range(0, len(df_conc)):
+    #     arr_columns.append("<b>" + arr_months[i] + "</b>")
+    # arr_columns.append("<b>To Date</b>")
 
     # accumulate the totals
     dd_invoiced = 0
@@ -324,13 +407,13 @@ def main():
 
         df_cur = df_holiday.loc[
             (df_holiday["HOLIDAY"].dt.year == 2024)
-            & (df_holiday["HOLIDAY"].dt.month == 5)
+            & (df_holiday["HOLIDAY"].dt.month == 6)
         ]
         df_cur["HOLIDAY"] = df_holiday["HOLIDAY"].dt.strftime("%Y-%m-%d")
 
         col1, col2 = st.columns(2)
         with col1:
-            st.header("Holidays in May")
+            st.header("Holidays in June")
             st.dataframe(df_cur[["HOLIDAY", "HOLIDAY_NAME"]], hide_index=True)
         with col2:
             st.header("Number of Holidays in 2024")
@@ -350,7 +433,7 @@ def main():
                 "Starting Date", pd.Timestamp(2023, 10, 1)
             ).strftime("%Y%m%d")
 
-        df_rates, df_holiday, df_invoice = load_data()
+        df_rates, df_holiday, df_invoice = load_data2()
 
         df_rates = df_rates.query("PERIOD >= @date_start")
         df_rates["Billable"] = df_rates["TARGET"] * df_rates["INIT_RATE"]

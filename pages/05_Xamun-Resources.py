@@ -11,7 +11,7 @@ xamun_projs = [
     "Xamun Delivery",
     "Advance Energy",
     "Xamun Marketplace",
-    "SwiftLoan",
+    "Xamun Solutions",
     "Steer Marketplace",
     "ePCSO",
     "AE Project 2 WebUI",
@@ -34,6 +34,7 @@ def load_data():
     _df_employee = session.sql(
         "select EMPLOYEE,GRP from DB_MIS.SALES.EMPLOYEE where RESIGNED=False"
     ).to_pandas()
+
     _df_eod = session.sql("select * from DB_MIS.SALES.EOD").to_pandas()
 
     session.close()
@@ -56,6 +57,45 @@ def load_data():
     return _df_employee, _df_eod
 
 
+@st.cache_data
+def load_data2():
+    _df_eod = pd.read_excel(
+        "/Users/shaun/eod/BAI EOD Log Report V2.xlsx",
+        usecols=["EmployeeName", "Date", "Account", "Hours", "Minutes"],
+        dtype={"Date": "datetime64[ns]"},
+        engine="openpyxl",
+    )
+    _df_eod["TotalHrs"] = _df_eod.apply(
+        lambda x: ((x["Hours"] * 60) + x["Minutes"]) / 60, axis=1
+    )
+
+    _df_emp = pd.read_excel(
+        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        usecols=["Employee", "GRP", "Resigned"],
+        sheet_name="employees",
+    )
+
+    _df_emp = _df_emp.loc[
+        (_df_emp["Resigned"].str.upper() != "X")
+        & (
+            ~_df_emp["Employee"].isin(
+                [
+                    "Conrado Cruz",
+                    "Roy Saberon",
+                    "Samuel Lucas",
+                    "PM",
+                    "SE",
+                    "TE",
+                    "UI",
+                ]
+            )
+        ),
+        ["Employee", "GRP"],
+    ]
+
+    return _df_emp, _df_eod
+
+
 def fill_blanks(arrs, longest):
     for arr in arrs:
         i = len(arr)
@@ -71,29 +111,39 @@ def main():
     with xamun_container:
         _, _, col1, col2 = st.columns([0.25, 0.25, 0.25, 0.25])
         with col1:
-            date_start = st.date_input("Starting Date", pd.Timestamp(2024, 4, 1))
+            date_start = st.date_input("Starting Date", pd.Timestamp(2024, 6, 1))
         with col2:
-            date_end = st.date_input("Ending Date", pd.Timestamp(2024, 4, 30))
+            date_end = st.date_input("Ending Date", pd.Timestamp(2024, 6, 30))
         st.divider()
 
         date_start = date_start.strftime("%Y%m%d")
         date_end = date_end.strftime("%Y%m%d")
 
-        df_emp, df_eod = load_data()
-
+        df_emp, df_eod = load_data2()
+        df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"
         df_dd = df_emp.loc[(~df_emp["GRP"].str.upper().str.startswith("X"))]
 
         # filter by date range and filter-out non Xamun accts
-        df_eod_filtered = df_eod.loc[
+        df_eod_xamun_projs = df_eod.loc[
             (df_eod["Date"] >= date_start)
             & (df_eod["Date"] <= date_end)
             & (df_eod.Account.isin(xamun_projs))
         ]
+        df_eod_xamun_projs_with_da = df_eod.loc[
+            (df_eod["Date"] >= date_start)
+            & (df_eod["Date"] <= date_end)
+            & (df_eod.Account.isin(xamun_projs + ["Data Analytics"]))
+        ]
+        df_analytics = df_eod.loc[
+            (df_eod.Date >= date_start)
+            & (df_eod.Date <= date_end)
+            & (df_eod.Account == "Data Analytics")
+        ]
 
         interns = (
-            df_eod_filtered.loc[
+            df_eod_xamun_projs.loc[
                 (
-                    ~df_eod_filtered["EmployeeName"].isin(df_emp["Employee"]),
+                    ~df_eod_xamun_projs["EmployeeName"].isin(df_emp["Employee"]),
                     "EmployeeName",
                 )
             ]
@@ -102,11 +152,10 @@ def main():
         )
         # interns
 
-        # interns = ~df_eod_filtered["EmployeeName"].isin(df_emp).unique()
         # interns
-        _df = df_eod_filtered.groupby(
-            ["EmployeeName", "Account"], as_index=False
-        ).TotalHrs.sum()
+        # _df = df_eod_xamun_projs.groupby(
+        #     ["EmployeeName", "Account"], as_index=False
+        # ).TotalHrs.sum()
 
         def get_type(row):
             if row.EmployeeName in (interns):
@@ -127,17 +176,16 @@ def main():
         # chart 1: hrs
         col1, col2, col3 = st.columns([0.5, 0.25, 0.25])
 
+        _df1 = df_eod_xamun_projs.groupby(
+            ["EmployeeName"], as_index=False
+        ).TotalHrs.sum()
+        _df1["Type"] = _df1.apply(lambda x: get_type(x), axis="columns")
+
         with col1:
 
             # Total Hours
 
-            _df0 = df_eod.loc[
-                (df_eod["Date"] >= date_start)
-                & (df_eod["Date"] <= date_end)
-                & (df_eod.Account.isin(xamun_projs + ["Data Analytics"]))
-            ]
-
-            _grp = _df0.groupby(["Account"], as_index=False)
+            _grp = df_eod_xamun_projs_with_da.groupby(["Account"], as_index=False)
             _df = _grp.TotalHrs.sum().sort_values(["Account"])
 
             fig = px.bar(
@@ -173,16 +221,11 @@ def main():
 
             # Total Hrs By Type
 
-            _df1 = df_eod_filtered.groupby(
-                ["EmployeeName"], as_index=False
-            ).TotalHrs.sum()
-
-            _df1["Type"] = _df1.apply(lambda x: get_type(x), axis="columns")
-            _df1 = _df1.groupby(["Type"], as_index=False).TotalHrs.sum()
-            _df1["TypeName"] = _df1["Type"].apply(lambda x: get_type_name(x))
+            _df2 = _df1.groupby(["Type"], as_index=False).TotalHrs.sum()
+            _df2["TypeName"] = _df2["Type"].apply(lambda x: get_type_name(x))
 
             fig = px.pie(
-                _df1, values="TotalHrs", names="TypeName", title="Total Hrs By Type"
+                _df2, values="TotalHrs", names="TypeName", title="Total Hrs By Type"
             )
             fig.update_traces(showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
@@ -192,7 +235,7 @@ def main():
 
             # Head Count By Type
 
-            # grp = df_eod_filtered.groupby(["Account", "EmployeeName"], as_index=False)
+            # grp = df_eod_xamun_projs.groupby(["Account", "EmployeeName"], as_index=False)
             # _df = (
             #     grp.TotalHrs.count()
             #     .groupby(["Account"], as_index=False)
@@ -211,16 +254,11 @@ def main():
             # # fig.update_layout(template=2)
             # st.plotly_chart(fig, use_container_width=True, height=200)
 
-            _df1 = df_eod_filtered.groupby(
-                ["EmployeeName"], as_index=False
-            ).TotalHrs.sum()
-
-            _df1["Type"] = _df1.apply(lambda x: get_type(x), axis="columns")
-            _df1 = _df1.groupby(["Type"], as_index=False).EmployeeName.count()
-            _df1["TypeName"] = _df1["Type"].apply(lambda x: get_type_name(x))
+            _df2 = _df1.groupby(["Type"], as_index=False).EmployeeName.count()
+            _df2["TypeName"] = _df2["Type"].apply(lambda x: get_type_name(x))
 
             fig = px.pie(
-                _df1,
+                _df2,
                 values="EmployeeName",
                 names="TypeName",
                 title="Head Count By Type",
@@ -230,17 +268,14 @@ def main():
         # -------------------------------------------------------------
         st.divider()
 
-        _df0 = df_eod.loc[
-            (df_eod["Date"] >= date_start)
-            & (df_eod["Date"] <= date_end)
-            & (df_eod.Account.isin(xamun_projs))
-        ]
-
-        _grp = _df0.groupby(["Account"], as_index=False)
-        _df = _grp.TotalHrs.sum().sort_values(["Account"])
+        #####################################################################
+        #
+        #               Pie - Percentage Hours By Account
+        #
+        #####################################################################
 
         fig = px.pie(
-            _df0,
+            df_eod_xamun_projs,
             values="TotalHrs",
             names="Account",
             title="Percentage Hours By Account",
@@ -253,12 +288,12 @@ def main():
 
         #####################################################################
         #
-        #               XAMUN FTEs
+        #               XAMUN FTEs - not interns nor DD's
         #
         #####################################################################
-        _df = df_eod_filtered.loc[
-            (~df_eod_filtered.EmployeeName.isin(interns))
-            & (~df_eod_filtered.EmployeeName.isin(df_dd.Employee))
+        _df = df_eod_xamun_projs.loc[
+            (~df_eod_xamun_projs.EmployeeName.isin(interns))
+            & (~df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
         ]
         _df = (
             _df.groupby(["Account", "EmployeeName"], as_index=False)
@@ -281,12 +316,15 @@ def main():
 
         #####################################################################
         #
-        #               BORROWED FTEs
+        #               BORROWED FTEs - DD's
         #
         #####################################################################
-        _df = df_eod_filtered.loc[
-            ~(df_eod_filtered.EmployeeName.isin(interns))
-            & (df_eod_filtered.EmployeeName.isin(df_dd.Employee))
+        # _df = df_eod_xamun_projs.loc[
+        #     # ~(df_eod_xamun_projs.EmployeeName.isin(interns))
+        #     (df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
+        # ]
+        _df = df_eod_xamun_projs.loc[
+            (df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
         ]
         _df = (
             _df.groupby(["Account", "EmployeeName"], as_index=False)
@@ -312,8 +350,8 @@ def main():
         #               INTERNS
         #
         #####################################################################
-        _df = df_eod_filtered.loc[
-            (df_eod_filtered.EmployeeName.isin(interns))
+        _df = df_eod_xamun_projs.loc[
+            (df_eod_xamun_projs.EmployeeName.isin(interns))
         ].sort_values("EmployeeName")
         _df = _df.groupby(["Account", "EmployeeName"], as_index=False).TotalHrs.sum()
         fig = px.bar(
@@ -336,7 +374,7 @@ def main():
         #
         #####################################################################
         _df = (
-            df_eod_filtered.groupby(
+            df_eod_xamun_projs.groupby(
                 ["Account", "EmployeeName"], as_index=False
             ).TotalHrs.sum()
         ).sort_values("EmployeeName")
@@ -358,12 +396,12 @@ def main():
         #               Xamun Core
         #
         #####################################################################
-        _df = df_eod_filtered.loc[
-            (~df_eod_filtered.EmployeeName.isin(interns))
-            & (~df_eod_filtered.EmployeeName.isin(df_dd.Employee))
-            & (df_eod_filtered["Account"] == "Xamun")
+        _df = df_eod_xamun_projs.loc[
+            (~df_eod_xamun_projs.EmployeeName.isin(interns))
+            & (~df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
+            & (df_eod_xamun_projs["Account"] == "Xamun")
             & (
-                df_eod_filtered["EmployeeName"].isin(
+                df_eod_xamun_projs["EmployeeName"].isin(
                     [
                         "Allen Christian Tubo",
                         "Avik Das",
@@ -400,12 +438,12 @@ def main():
         #               Xamun Core Support
         #
         #####################################################################
-        _df = df_eod_filtered.loc[
-            (~df_eod_filtered.EmployeeName.isin(interns))
-            & (~df_eod_filtered.EmployeeName.isin(df_dd.Employee))
-            & (df_eod_filtered["Account"] == "Xamun")
+        _df = df_eod_xamun_projs.loc[
+            (~df_eod_xamun_projs.EmployeeName.isin(interns))
+            & (~df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
+            & (df_eod_xamun_projs["Account"] == "Xamun")
             & (
-                ~df_eod_filtered["EmployeeName"].isin(
+                ~df_eod_xamun_projs["EmployeeName"].isin(
                     [
                         "Allen Christian Tubo",
                         "Avik Das",
@@ -443,14 +481,11 @@ def main():
         #               Analytics
         #
         #####################################################################
-        _df0 = df_eod.loc[
-            (df_eod.Date >= date_start)
-            & (df_eod.Date <= date_end)
-            & (df_eod.Account == "Data Analytics")
-        ]
 
         _df = (
-            _df0.groupby(["Account", "EmployeeName"], as_index=False).TotalHrs.sum()
+            df_analytics.groupby(
+                ["Account", "EmployeeName"], as_index=False
+            ).TotalHrs.sum()
         ).sort_values("EmployeeName")
 
         total_hrs = "{0:.2f}".format(_df.TotalHrs.sum())
@@ -474,7 +509,7 @@ def main():
             arr = []
             st.header("Based on EOD")
             df = (
-                df_eod_filtered.groupby(["EmployeeName", "Account"], as_index=False)
+                df_eod_xamun_projs.groupby(["EmployeeName", "Account"], as_index=False)
                 .TotalHrs.sum()
                 .pivot(index="EmployeeName", columns="Account", values="TotalHrs")
                 .fillna("")
@@ -606,6 +641,19 @@ def main():
             "Jomar Lagunsad - PM                  (Xamun Delivery)",
             "Glen Ebina - UI/UX                   (Design)",
             "Sam Lucas                            (Design)",
+            "Dharyll Jan Calaliman                (QRI)",
+            "Jayson Echano                        (QRI)",
+            "Jessica Joy Angeles                  (QRI)",
+            "Jomari Munsayac                      (QRI)",
+            # "Ace Morris Pepito - Contractual       (DD - by July)",
+            "Brian Tumibay                        (DD - by July)",
+            "Dino Angelo Reyes                    (DD - by July)",
+            "Eduard Hinunangan                    (DD - by July)",
+            "Jansen Neil Olay                     (DD - by July)",
+            "Joseph Artillaga                     (DD - by July)",
+            # "Kenneth Audrey Arcenio  - Contractual   (DD - by July)",
+            "Marc Alvin Villarin                  (DD - by July)",
+            "Raymun Galvez                        (DD - by July)",
         ]
 
         longest = max(

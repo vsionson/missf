@@ -63,9 +63,10 @@ def load_data():
 def load_data2():
     config = ConfigParser()
     config.read("config.ini")
-    path = config["billing"]["path"]
-    file_name_billing = Path(path) / "Billing v3.0.xlsx"
-    file_name_eod = Path(path) / "BAI EOD Log Report V2.xlsx"
+    path_billing = config["billing"]["path"]
+    path_eod = config["eod"]["path"]
+    file_name_billing = Path(path_billing) / "Billing v3.0.xlsx"
+    file_name_eod = Path(path_eod) / "BAI EOD Log Report V2.xlsx"
 
     _df_eod = pd.read_excel(
         file_name_eod,

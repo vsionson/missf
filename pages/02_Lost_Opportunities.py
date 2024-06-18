@@ -3,6 +3,9 @@ import plotly.express as px
 import streamlit as st
 import numpy as np
 from snowflake.snowpark import Session
+from pathlib import Path
+from configparser import ConfigParser
+
 
 st.title("Lost Opportunities")
 
@@ -35,6 +38,9 @@ def load_data():
 
 @st.cache_data
 def load_data2():
+    config = ConfigParser()
+    config.read("config.ini")
+    file_name = Path(config["billing"]["path"]) / "Billing v3.0.xlsx"
     # sales/rates
     cols = [
         "Employee",
@@ -50,7 +56,7 @@ def load_data2():
         "ind_eligibility",
     ]
     _df_sales = pd.read_excel(
-        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        file_name,
         sheet_name="RateCard",
         skiprows=1,
         usecols=cols,

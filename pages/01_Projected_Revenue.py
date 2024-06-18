@@ -4,6 +4,8 @@ from datetime import datetime
 import plotly.express as px
 import plotly.graph_objects as go
 from snowflake.snowpark import Session
+from configparser import ConfigParser
+from pathlib import Path
 
 st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
@@ -45,6 +47,12 @@ def load_data():
 
 @st.cache_data
 def load_data2():
+    config = ConfigParser()
+    config.read("config.ini")
+    path = config["billing"]["path"]
+    file_name_billing = Path(path) / "Billing v3.0.xlsx"
+    file_name_invoice = Path(path) / "BAI Collections as of date.xlsx"
+
     # sales/rates
     cols = [
         "Employee",
@@ -60,7 +68,7 @@ def load_data2():
         "ind_eligibility",
     ]
     _df_sales = pd.read_excel(
-        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        file_name_billing,
         sheet_name="RateCard",
         skiprows=1,
         usecols=cols,
@@ -88,7 +96,7 @@ def load_data2():
 
     # holiday
     _df_holiday = pd.read_excel(
-        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        file_name_billing,
         sheet_name="Holidays",
         parse_dates=["Date"],
         date_format="%Y-%m-%d",
@@ -103,7 +111,7 @@ def load_data2():
 
     # invoice
     _df_invoice = pd.read_excel(
-        "/Users/shaun/Documents/dropzone/BAI Collections as of date.xlsx",
+        file_name_invoice,
         sheet_name="Raw",
     )
     _df_invoice = _df_invoice.drop(["CURRENCY", "STATUS"], axis=1)

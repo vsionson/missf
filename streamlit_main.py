@@ -29,6 +29,7 @@ import plotly.express as px
 from pathlib import Path
 from snowflake.snowpark import Session
 import snowflake.snowpark as snowpark
+from configparser import ConfigParser
 
 
 @st.cache_data
@@ -55,7 +56,10 @@ def load_data():
 
 @st.cache_data
 def load_data2():
-
+    config = ConfigParser()
+    config.read("config.ini")
+    path = config["azure"]["path"]
+    
     def load_monthly(file):
         _df = pd.read_excel(
             file,
@@ -71,12 +75,13 @@ def load_data2():
         _df.loc[_df.Subscription != "Beta", "Subscription"] = "Production"
         return _df
 
-    arr = sorted(Path("/Users/shaun/projects/mis/data").glob("*2024-*.xlsx"))
-    # arr = sorted(Path("data").glob("Azure Usage*2024-*.xlsx"))
+    arr = sorted(Path(path).glob("*2024-*.xlsx"))
     arr_df = [load_monthly(el) for el in arr]
 
+    file_name = Path(path) / "Azure Usage Jan to Dec 2023.xlsx"
+    
     df_since_2023 = pd.read_excel(
-        "/Users/shaun/projects/mis/data/Jan to Dec 2023.xlsx",
+        file_name,
         skiprows=2,
         usecols=["Category", "Subscription", "Cost", "UsageDate", "Resource Group"],
         engine="openpyxl",

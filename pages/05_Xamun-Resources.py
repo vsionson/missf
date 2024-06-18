@@ -4,6 +4,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from snowflake.snowpark import Session
+from pathlib import Path
+from configparser import ConfigParser
 
 
 xamun_projs = [
@@ -59,8 +61,14 @@ def load_data():
 
 @st.cache_data
 def load_data2():
+    config = ConfigParser()
+    config.read("config.ini")
+    path = config["billing"]["path"]
+    file_name_billing = Path(path) / "Billing v3.0.xlsx"
+    file_name_eod = Path(path) / "BAI EOD Log Report V2.xlsx"
+
     _df_eod = pd.read_excel(
-        "/Users/shaun/eod/BAI EOD Log Report V2.xlsx",
+        file_name_eod,
         usecols=["EmployeeName", "Date", "Account", "Hours", "Minutes"],
         dtype={"Date": "datetime64[ns]"},
         engine="openpyxl",
@@ -70,7 +78,7 @@ def load_data2():
     )
 
     _df_emp = pd.read_excel(
-        "/Users/shaun/Documents/Billing v3.0.xlsx",
+        file_name_billing,
         usecols=["Employee", "GRP", "Resigned"],
         sheet_name="employees",
     )

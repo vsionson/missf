@@ -1,5 +1,5 @@
-snowflake-connector-python=3.5.0=py38hcec6c5f_0
-snowflake-snowpark-python=1.11.1=py38hecd8cb5_0
-streamlit=1.34.0=pyhd8ed1ab_0
+snowflake-connector-python=3.5.0
+snowflake-snowpark-python=1.11.1
+streamlit=1.34.0
 plotly
 openpyxl

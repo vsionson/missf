@@ -1,5 +1,5 @@
+openpyxl
+plotly
 snowflake-connector-python
 snowflake-snowpark-python
 streamlit
-plotly
-openpyxl

@@ -27,7 +27,7 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "WH_MIS",
+        "warehouse": "BAI_WH",
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
@@ -128,7 +128,7 @@ def main():
         date_start = date_start.strftime("%Y%m%d")
         date_end = date_end.strftime("%Y%m%d")
 
-        df_emp, df_eod = load_data2()
+        df_emp, df_eod = load_data()
         df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"
         df_dd = df_emp.loc[(~df_emp["GRP"].str.upper().str.startswith("X"))]
 

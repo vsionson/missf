@@ -19,7 +19,7 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "WH_MIS",
+        "warehouse": "BAI_WH",
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
@@ -441,7 +441,7 @@ def main():
                 "Starting Date", pd.Timestamp(2023, 10, 1)
             ).strftime("%Y%m%d")
 
-        df_rates, df_holiday, df_invoice = load_data2()
+        df_rates, df_holiday, df_invoice = load_data()
 
         df_rates = df_rates.query("PERIOD >= @date_start")
         df_rates["Billable"] = df_rates["TARGET"] * df_rates["INIT_RATE"]

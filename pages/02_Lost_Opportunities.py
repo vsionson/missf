@@ -17,7 +17,7 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "WH_MIS",
+        "warehouse": "BAI_WH",
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
@@ -85,7 +85,7 @@ def load_data2():
 
 
 def main():
-    df = load_data2()
+    df = load_data()
 
     df = df.rename(
         columns={

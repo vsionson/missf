@@ -44,7 +44,7 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "WH_MIS",
+        "warehouse": "BAI_WH",
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
@@ -59,7 +59,7 @@ def load_data2():
     config = ConfigParser()
     config.read("config.ini")
     path = config["azure"]["path"]
-    
+
     def load_monthly(file):
         _df = pd.read_excel(
             file,
@@ -79,7 +79,7 @@ def load_data2():
     arr_df = [load_monthly(el) for el in arr]
 
     file_name = Path(path) / "Azure Usage Jan to Dec 2023.xlsx"
-    
+
     df_since_2023 = pd.read_excel(
         file_name,
         skiprows=2,
@@ -261,7 +261,7 @@ def main():
     st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
     st.title("QuickReach Azure Consumption")
 
-    df_since_2023 = load_data2()
+    df_since_2023 = load_data()
 
     df_since_2023["USAGEDATE"] = df_since_2023["USAGEDATE"].astype("datetime64[ns]")
     df_since_2023["REPORTDATE"] = df_since_2023["USAGEDATE"].dt.strftime("%Y-%m")
@@ -330,11 +330,15 @@ def main():
             "Starting Date",
             value=datetime(yr1, mon1, day1),
             format="MM/DD/YYYY",
-            min_value=datetime(yr1, mon1, day1),
-            max_value=datetime(yr2, mon2, day2),
+            # min_value=datetime(yr1, mon1, day1),
+            # max_value=datetime(yr2, mon2, day2),
+            min_value=dt1,
+            max_value=dt2,
         )
 
-        _df = df_since_2023.loc[df_since_2023.USAGEDATE >= start_date]
+        _df = df_since_2023.loc[df_since_2023.USAGEDATE >= start_date].sort_values(
+            "USAGEDATE"
+        )
         fig = px.line(
             _df.groupby(["USAGEDATE"], as_index=False).COST.sum(),
             x="USAGEDATE",
@@ -514,6 +518,10 @@ def main():
             )
 
             st.plotly_chart(fig, use_container_width=True, height=200)
+
+            st.write(
+                "With 12 remaining days and at 82.18 ave., by EOM the estimated total will be: $986.16"
+            )
 
             st.divider()
             ###########################################################

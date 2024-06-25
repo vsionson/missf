@@ -33,9 +33,7 @@ def load_data():
     }
     session = Session.builder.configs(connection_parameters).create()
 
-    _df_employee = session.sql(
-        "select EMPLOYEE,GRP from DB_MIS.SALES.EMPLOYEE where RESIGNED=False"
-    ).to_pandas()
+    _df_employee = session.sql("select * from DB_MIS.SALES.EMPLOYEE").to_pandas()
 
     _df_eod = session.sql("select * from DB_MIS.SALES.EOD").to_pandas()
 
@@ -117,6 +115,8 @@ def fill_blanks(arrs, longest):
 def main():
     st.title("Xamun Resources")
     xamun_container = st.container()
+    all_fte_container = st.container()
+
     with xamun_container:
         _, _, col1, col2 = st.columns([0.25, 0.25, 0.25, 0.25])
         with col1:
@@ -129,8 +129,11 @@ def main():
         date_end = date_end.strftime("%Y%m%d")
 
         df_emp, df_eod = load_data()
+        df_emp_active = df_emp.loc[(df_emp["RESIGNED"] == False)]
         df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"
-        df_dd = df_emp.loc[(~df_emp["GRP"].str.upper().str.startswith("X"))]
+        df_dd = df_emp_active.loc[
+            (~df_emp_active["GRP"].str.upper().str.startswith("X"))
+        ]
 
         # filter by date range and filter-out non Xamun accts
         df_eod_xamun_projs = df_eod.loc[
@@ -152,7 +155,7 @@ def main():
         interns = (
             df_eod_xamun_projs.loc[
                 (
-                    ~df_eod_xamun_projs["EmployeeName"].isin(df_emp["Employee"]),
+                    ~df_eod_xamun_projs["EmployeeName"].isin(df_emp_active["Employee"]),
                     "EmployeeName",
                 )
             ]
@@ -826,6 +829,26 @@ def main():
         st.plotly_chart(fig, use_container_width=True)  # , height=600)
         #############################################
 
+        st.divider()
+
+    with all_fte_container:
+        is_active = st.checkbox("Active", value=True)
+        is_resigned = st.checkbox("Resigned", value=False)
+
+        acct = st.text_input("Account")
+
+        if is_active or is_resigned:
+            st.dataframe(
+                df_emp.loc[
+                    (
+                        (df_emp["RESIGNED"] != is_active)
+                        | (df_emp["RESIGNED"] == is_resigned)
+                    )
+                    & (df_emp["ACCOUNT"].str.startswith(acct))
+                ]
+            )
+        else:
+            st.dataframe(None)
     return None
 
 

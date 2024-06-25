@@ -3,5 +3,8 @@ channels:
 - snowflake
 dependencies:
 - pandas
+- streamlit
+- snowflake-connector-python
+- snowflake-snowpark-python
 - plotly
 - openpyxl

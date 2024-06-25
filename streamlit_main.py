@@ -24,7 +24,7 @@ Azure Consumption
 
 import pandas as pd
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import plotly.express as px
 from pathlib import Path
 from snowflake.snowpark import Session
@@ -110,6 +110,12 @@ def load_data2():
         }
     )
     return _df
+
+
+def remaining_days_of_the_month(ts):
+    today = ts.date()
+    next_month = date(today.year, today.month, 28) + timedelta(days=4)
+    return (next_month - timedelta(days=next_month.day) - today).days
 
 
 def plot_the_chart_combined(df):
@@ -519,9 +525,25 @@ def main():
 
             st.plotly_chart(fig, use_container_width=True, height=200)
 
-            st.write(
-                "With 12 remaining days and at 82.18 ave., by EOM the estimated total will be: $986.16"
-            )
+            # get the lastest total amount
+            current_total = df_since_2023.groupby(
+                pd.Grouper(key="USAGEDATE", freq="1M")
+            ).sum()["COST"][-1]
+
+            remaining_days = remaining_days_of_the_month(dt2)
+
+            latest_total_ave = _df2["COST"].tolist()[-1]
+
+            balance = remaining_days * latest_total_ave
+
+            total_by_eom = balance + current_total
+
+            # msg = f"With {remaining_days} remaining days till EOM and at ${latest_total_ave:.2f} ave by EOM the estimated total will be ${total_by_eom:.2f}"
+            # f"Estimated by EOM ${total_by_eom:.2f}"
+
+            st.write(f"Remaining days : {remaining_days}")
+            st.write(f"Current total : ${current_total:,.2f}")
+            st.write(f"By end of the month : ${total_by_eom:,.2f}")
 
             st.divider()
             ###########################################################

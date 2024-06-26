@@ -1,4 +1,7 @@
 .DS_Store
-data_files.txt
 venv/
+.venv/
+.streamlit/secrets.toml
 config.ini
+data_files.txt
+environment.yml

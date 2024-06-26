@@ -30,6 +30,8 @@ from pathlib import Path
 from snowflake.snowpark import Session
 import snowflake.snowpark as snowpark
 from configparser import ConfigParser
+import streamlit_authenticator as stauth
+from streamlit_authenticator.utilities.hasher import Hasher
 
 
 @st.cache_data
@@ -265,6 +267,7 @@ def main():
         return None
 
     st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
+
     st.title("QuickReach Azure Consumption")
 
     df_since_2023 = load_data()
@@ -276,7 +279,9 @@ def main():
         ["USAGEDATE"], ascending=False
     ).REPORTDATE.unique()
 
-    lst = df_since_2023["RESOURCEGROUP"].unique()  # .tolist()
+    lst = df_since_2023["RESOURCEGROUP"].unique().tolist()
+    if lst[-1] is None:
+        lst.pop()
 
     azure_container = st.container()
     with azure_container:

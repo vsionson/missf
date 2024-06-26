@@ -3,3 +3,4 @@ plotly
 snowflake-connector-python
 snowflake-snowpark-python
 streamlit
+streamlit-authenticator

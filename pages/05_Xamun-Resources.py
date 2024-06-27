@@ -724,6 +724,26 @@ def main():
                 "Remarks": "",
                 "Group": "DD - by July",
             },
+            {
+                "Employee": "Dominic Glenn Zabala",
+                "Remarks": "",
+                "Group": "DD - by July 7",
+            },
+            {
+                "Employee": "Ivan Joshua Merete",
+                "Remarks": "",
+                "Group": "DD - by July 7",
+            },
+            {
+                "Employee": "Irish Quilla",
+                "Remarks": "PM (in exchange of Melody Nones)",
+                "Group": "DD - by July 7",
+            },
+            {
+                "Employee": "Krischell Villadulid",
+                "Remarks": "",
+                "Group": "DD - by July 7",
+            },
         ]
 
         df_xamun_teams2 = pd.DataFrame(platform2)

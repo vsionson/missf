@@ -103,15 +103,6 @@ def load_data2():
     return _df_emp, _df_eod
 
 
-def fill_blanks(arrs, longest):
-    for arr in arrs:
-        i = len(arr)
-        while i < longest:
-            arr.append("")
-            i += 1
-    return None
-
-
 def main():
     st.title("Xamun Resources")
     xamun_container = st.container()
@@ -603,95 +594,143 @@ def main():
         ]
         product.sort()
 
-        platform = [
-            "Allen Christian Tubo - Full Stack",
-            "Avik Das - Full Stack",
-            "Cyrill Binaohan - TL",
-            "John Aldrich Callado - Sr. Flutter",
-            "Maricar Mara - PM",
-            "Sarah Jane Rosales - Tester",
-        ]
-        # platform.sort()
-
-        platform_support = [
-            "Von Lou Velle Segocio - Mid FrontEnd",
-            "Kevin Paul Merwa - Jr Backend (Xamun Delivery)",
-            "Noel Guevarra - Mid Flutter (Xamun Delivery)",
-            "Erskine Roy Bornillo - Jr Backend (Xamun Delivery)",
-            "Ira Louise David - Jr Flutter (Xamun Delivery)",
-            "Jean May Alvarez - Mid Flutter (Xamun Delivery)",
-        ]
-        platform_support.sort()
-
-        delivery = [
-            "Janicah Lorra Cequeña - Tester",
-            "Lauren James Leal - Backend",
-            "Ma. Ethel Yatar - Sr Tester",
-            "Mark Rayden Mirafuente - Jr Frontend",
-            "Jomar Lagunsad - PM",
-        ]
-        delivery.sort()
-
-        design = [
-            "Glen Ebina - UI/UX",
-            "Sam Lucas",
-        ]
-        design.sort()
-
-        the_rest = [
-            "Von Lou Velle Segocio - Mid FrontEnd (Xamun Core Support)",
-            "Kevin Paul Merwa - Jr Backend        (Xamun Core Support)",
-            "Noel Guevarra - Mid Flutter          (Xamun Core Support)",
-            "Erskine Roy Bornillo - Jr Backend    (Xamun Core Support)",
-            "Ira Louise David - Jr Flutter        (Xamun Core Support)",
-            "Jean May Alvarez - Mid Flutter       (Xamun Core Support)",
-            "Aevin Earl Molina                    (Product)",
-            "Janicah Lorra Cequeña - Tester       (Xamun Delivery)",
-            "Lauren James Leal - Backend          (Xamun Delivery)",
-            "Ma. Ethel Yatar - Sr Tester          (Xamun Delivery)",
-            "Mark Rayden Mirafuente - Jr Frontend (Xamun Delivery)",
-            "Jomar Lagunsad - PM                  (Xamun Delivery)",
-            "Glen Ebina - UI/UX                   (Design)",
-            "Sam Lucas                            (Design)",
-            "Dharyll Jan Calaliman                (QRI)",
-            "Jayson Echano                        (QRI)",
-            "Jessica Joy Angeles                  (QRI)",
-            "Jomari Munsayac                      (QRI)",
-            # "Ace Morris Pepito - Contractual       (DD - by July)",
-            "Brian Tumibay                        (DD - by July)",
-            "Dino Angelo Reyes                    (DD - by July)",
-            "Eduard Hinunangan                    (DD - by July)",
-            "Jansen Neil Olay                     (DD - by July)",
-            "Joseph Artillaga                     (DD - by July)",
-            # "Kenneth Audrey Arcenio  - Contractual   (DD - by July)",
-            "Marc Alvin Villarin                  (DD - by July)",
-            "Raymun Galvez                        (DD - by July)",
+        platform2 = [
+            {"Employee": "Allen Christian Tubo", "Remarks": "Full Stack"},
+            {"Employee": "Avik Das", "Remarks": "Full Stack"},
+            {"Employee": "Cyrill Binaohan", "Remarks": "TL"},
+            {"Employee": "John Aldrich Callado", "Remarks": "Sr. Flutter"},
+            {"Employee": "Maricar Mara", "Remarks": "PM"},
+            {"Employee": "Sarah Jane Rosales", "Remarks": "Tester"},
         ]
 
-        longest = max(
-            len(product),
-            len(platform_support),
-            len(platform),
-            len(delivery),
-            len(design),
-            len(the_rest),
-        )
-        fill_blanks(
-            [platform, platform_support, product, delivery, design, the_rest], longest
-        )
-
-        df_xamun_teams = pd.DataFrame(
+        the_rest2 = [
             {
-                "Platform": platform,
-                "PlatformSupport": platform_support,
-                "Product": product,
-                "Delivery": delivery,
-                "Design": design,
-                "Rest": the_rest,
+                "Employee": "Erskine Roy Bornillo",
+                "Remarks": "Jr Backend",
+                "Group": "Xamun Core Support",
             },
-            index=np.arange(1, longest + 1),
-        )
-        df_core = df_xamun_teams.loc[0:6, ["Platform"]]
+            {
+                "Employee": "Ira Louise David",
+                "Remarks": "Jr Flutter",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Jean May Alvarez",
+                "Remarks": "Mid Flutter",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Kevin Paul Merwa",
+                "Remarks": "Jr Backend",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Noel Guevarra",
+                "Remarks": "Mid Flutter",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Von Lou Velle Segocio",
+                "Remarks": "Mid FrontEnd",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Aevin Earl Molina",
+                "Remarks": "",
+                "Group": "Xamun Product",
+            },
+            {
+                "Employee": "Janicah Lorra Cequeña",
+                "Remarks": "Tester",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Jomar Lagunsad",
+                "Remarks": "PM",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Lauren James Leal",
+                "Remarks": "Backend",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Mark Rayden Mirafuente",
+                "Remarks": "Jr Frontend",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Ma. Ethel Yatar",
+                "Remarks": "Sr Tester",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Glen Ebina",
+                "Remarks": "UI/UX",
+                "Group": "Design",
+            },
+            {
+                "Employee": "Dharyll Jan Calaliman",
+                "Remarks": "",
+                "Group": "QRI",
+            },
+            {
+                "Employee": "Jayson Echano",
+                "Remarks": "",
+                "Group": "QRI",
+            },
+            {
+                "Employee": "Jessica Joy Angeles",
+                "Remarks": "",
+                "Group": "QRI",
+            },
+            {
+                "Employee": "Jomari Munsayac",
+                "Remarks": "",
+                "Group": "QRI",
+            },
+            {
+                "Employee": "Brain Tumibay",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Dino Angelo Reyes",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Eduard Hinunangan",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Jansen Neil Olay",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Joseph Artillaga",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Marc Alvin Villarin ",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+            {
+                "Employee": "Raymun Galvez",
+                "Remarks": "",
+                "Group": "DD - by July",
+            },
+        ]
+
+        df_xamun_teams2 = pd.DataFrame(platform2)
+        df_xamun_teams2.index += 1
+
+        df_xamun_teams3 = pd.DataFrame(the_rest2)
+        df_xamun_teams3.index += 1
 
         fig = go.Figure(
             data=[
@@ -699,15 +738,18 @@ def main():
                     columnorder=[
                         1,
                         2,
+                        3,
                     ],
                     columnwidth=[
-                        2,
+                        1,
+                        5,
                         5,
                     ],
                     header=dict(
                         values=[
                             ["<b>LINE #</b>"],
-                            ["<b>PLATFORM</b>"],
+                            ["<b>Name</b>"],
+                            ["<b>Remarks</b>"],
                         ],
                         line_color="darkslategray",
                         fill_color="royalblue",
@@ -717,8 +759,11 @@ def main():
                     ),
                     cells=dict(
                         values=[
-                            df_core.index,
-                            df_core.Platform,
+                            # df_core.index,
+                            df_xamun_teams2.index,
+                            df_xamun_teams2.Employee,
+                            df_xamun_teams2.Remarks,
+                            # df_core.Platform,
                         ],
                         line_color="darkslategray",
                         fill=dict(
@@ -740,61 +785,17 @@ def main():
         fig.update_layout(title_text="FTE Distribution - Xamun Core")
         st.plotly_chart(fig, use_container_width=True)  # , height=600)
 
-        # fig = go.Figure(
-        #     data=[
-        #         go.Table(
-        #             columnorder=[1, 2, 3, 4, 5],
-        #             columnwidth=[2, 5, 5, 5, 5],
-        #             header=dict(
-        #                 values=[
-        #                     ["<b>LINE #</b>"],
-        #                     ["<b>PLATFORM SUPPORT</b>"],
-        #                     ["<b>PRODUCT</b>"],
-        #                     ["<b>DELIVERY</b>"],
-        #                     ["<b>DESIGN</b>"],
-        #                 ],
-        #                 line_color="darkslategray",
-        #                 fill_color="royalblue",
-        #                 # align=["left", "center"],
-        #                 font=dict(color="white", size=16),
-        #                 # height=35,
-        #             ),
-        #             cells=dict(
-        #                 values=[
-        #                     df_xamun_teams.index,
-        #                     df_xamun_teams.PlatformSupport,
-        #                     df_xamun_teams.Product,
-        #                     df_xamun_teams.Delivery,
-        #                     df_xamun_teams.Design,
-        #                 ],
-        #                 line_color="darkslategray",
-        #                 fill=dict(
-        #                     color=[
-        #                         "paleturquoise",
-        #                         "white",
-        #                         "silver",
-        #                         "white",
-        #                         "silver",
-        #                     ]
-        #                 ),
-        #                 align=["center", "left", "center"],
-        #                 # font_size=12,
-        #                 font=dict(color="black", size=16),
-        #                 height=30,
-        #             ),
-        #         )
-        #     ]
-        # )
-
         fig = go.Figure(
             data=[
                 go.Table(
-                    columnorder=[1, 2],
-                    columnwidth=[2, 5],
+                    columnorder=[1, 2, 3, 4],
+                    columnwidth=[1, 5, 5, 5],
                     header=dict(
                         values=[
                             ["<b>LINE #</b>"],
-                            ["<b>The Rest</b>"],
+                            ["<b>Name</b>"],
+                            ["<b>Remarks</b>"],
+                            ["<b>Group</b>"],
                         ],
                         line_color="darkslategray",
                         fill_color="royalblue",
@@ -804,8 +805,10 @@ def main():
                     ),
                     cells=dict(
                         values=[
-                            df_xamun_teams.index,
-                            df_xamun_teams.Rest,
+                            df_xamun_teams3.index,
+                            df_xamun_teams3.Employee,
+                            df_xamun_teams3.Remarks,
+                            df_xamun_teams3["Group"],
                         ],
                         line_color="darkslategray",
                         fill=dict(
@@ -832,10 +835,11 @@ def main():
         st.divider()
 
     with all_fte_container:
+        st.header("All FTEs")
         is_active = st.checkbox("Active", value=True)
         is_resigned = st.checkbox("Resigned", value=False)
 
-        acct = st.text_input("Account")
+        acct = st.text_input("Account (case-sensitive)")
 
         if is_active or is_resigned:
             st.dataframe(
@@ -845,7 +849,10 @@ def main():
                         | (df_emp["RESIGNED"] == is_resigned)
                     )
                     & (df_emp["ACCOUNT"].str.startswith(acct))
-                ]
+                ],
+                width=900,
+                height=600,
+                hide_index=True,
             )
         else:
             st.dataframe(None)

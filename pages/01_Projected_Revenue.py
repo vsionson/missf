@@ -157,7 +157,7 @@ def main_chart(df):
     )
 
     # highlight the target month (tick/x label)
-    highlighted_bar = "June 2024"
+    highlighted_bar = "July 2024"
     fig.update_traces(
         marker_color=["blue" if x == highlighted_bar else "#99ccff" for x in df.Month],
         textposition="inside",  # Position the text inside the bars
@@ -414,8 +414,8 @@ def main():
         df_holiday["Month"] = df_holiday["HOLIDAY"].dt.strftime("%B")
 
         df_cur = df_holiday.loc[
-            (df_holiday["HOLIDAY"].dt.year == 2024)
-            & (df_holiday["HOLIDAY"].dt.month == 6)
+            (df_holiday["HOLIDAY"].dt.year == datetime.today().year)
+            & (df_holiday["HOLIDAY"].dt.month == datetime.today().month)
         ]
         df_cur["HOLIDAY"] = df_holiday["HOLIDAY"].dt.strftime("%Y-%m-%d")
 
@@ -425,7 +425,9 @@ def main():
             st.dataframe(df_cur[["HOLIDAY", "HOLIDAY_NAME"]], hide_index=True)
         with col2:
             st.header("Number of Holidays in 2024")
-            df_yr = df_holiday.loc[df_holiday["HOLIDAY"].dt.year == 2024]
+            df_yr = df_holiday.loc[
+                df_holiday["HOLIDAY"].dt.year == datetime.today().year
+            ]
 
             df_yr2 = df_yr.groupby(["YYYYMM"], as_index=False).agg(
                 Holidays=("YYYYMM", "count")
@@ -438,7 +440,7 @@ def main():
         _, _, col = st.columns(3)
         with col:
             date_start = st.date_input(
-                "Starting Date", pd.Timestamp(2023, 10, 1)
+                "Starting Date", pd.Timestamp(2024, 1, 1)
             ).strftime("%Y%m%d")
 
         df_rates, df_holiday, df_invoice = load_data()

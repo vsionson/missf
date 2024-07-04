@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from snowflake.snowpark import Session
 from pathlib import Path
 from configparser import ConfigParser
+from check_pwd import check_password
 
 
 xamun_projs = [
@@ -104,11 +105,16 @@ def load_data2():
 
 
 def main():
-    st.title("Xamun Resources")
+    if not check_password():
+        st.stop()  # Do not continue if check_password is not True.
+
+    st.title(":bar_chart: Xamun Resources")
+
     xamun_container = st.container()
     all_fte_container = st.container()
 
     with xamun_container:
+
         _, _, col1, col2 = st.columns([0.25, 0.25, 0.25, 0.25])
         with col1:
             date_start = st.date_input("Starting Date", pd.Timestamp(2024, 6, 1))

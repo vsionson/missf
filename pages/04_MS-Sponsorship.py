@@ -1,13 +1,19 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-
-st.title("Microsoft Azure Sponsorship")
+from check_pwd import check_password
 
 
 def main():
+
+    if not check_password():
+        st.stop()  # Do not continue if check_password is not True.
+
+    st.title(":bar_chart: Microsoft Azure Sponsorship")
+
     sponsor_container = st.container()
     with sponsor_container:
+
         df_spons = pd.DataFrame(
             [
                 ["Aug 5-Sep 4", 761],

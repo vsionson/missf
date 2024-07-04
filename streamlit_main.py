@@ -32,6 +32,7 @@ import snowflake.snowpark as snowpark
 from configparser import ConfigParser
 import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities.hasher import Hasher
+from check_pwd import check_password
 
 
 @st.cache_data
@@ -268,7 +269,15 @@ def main():
 
     st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
-    st.title("QuickReach Azure Consumption")
+    #########################################
+
+    if not check_password():
+        st.stop()  # Do not continue if check_password is not True.
+
+    # Main Streamlit app starts here
+    #########################################
+
+    st.title(":bar_chart: QuickReach Azure Consumption")
 
     df_since_2023 = load_data()
 

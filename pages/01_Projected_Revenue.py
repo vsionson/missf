@@ -6,10 +6,7 @@ import plotly.graph_objects as go
 from snowflake.snowpark import Session
 from configparser import ConfigParser
 from pathlib import Path
-
-st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
-
-st.title(":bar_chart: MIS Report")
+from check_pwd import check_password
 
 
 @st.cache_data
@@ -409,6 +406,11 @@ def okr(df):
 
 
 def main():
+    if not check_password():
+        st.stop()  # Do not continue if check_password is not True.
+
+    st.title(":bar_chart: Projected Revenue")
+
     def load_holidays():
         df_holiday["YYYYMM"] = df_holiday["HOLIDAY"].dt.strftime("%Y-%m")
         df_holiday["Month"] = df_holiday["HOLIDAY"].dt.strftime("%B")
@@ -437,6 +439,7 @@ def main():
         return None
 
     with st.container():
+
         _, _, col = st.columns(3)
         with col:
             date_start = st.date_input(

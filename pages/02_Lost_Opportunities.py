@@ -5,9 +5,7 @@ import numpy as np
 from snowflake.snowpark import Session
 from pathlib import Path
 from configparser import ConfigParser
-
-
-st.title("Lost Opportunities")
+from check_pwd import check_password
 
 
 @st.cache_data
@@ -85,6 +83,11 @@ def load_data2():
 
 
 def main():
+    if not check_password():
+        st.stop()  # Do not continue if check_password is not True.
+
+    st.title(":bar_chart: Lost Opportunities")
+
     df = load_data()
 
     df = df.rename(

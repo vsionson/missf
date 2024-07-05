@@ -7,6 +7,7 @@ from snowflake.snowpark import Session
 from pathlib import Path
 from configparser import ConfigParser
 from check_pwd import check_password
+from datetime import date, timedelta
 
 
 xamun_projs = [
@@ -117,9 +118,13 @@ def main():
 
         _, _, col1, col2 = st.columns([0.25, 0.25, 0.25, 0.25])
         with col1:
-            date_start = st.date_input("Starting Date", pd.Timestamp(2024, 6, 1))
+            today = date.today()
+            date1 = date(today.year, today.month, 1)
+            date2 = date(today.year, today.month, 28) + timedelta(days=4)
+            date2 = date2 - timedelta(days=date2.day)
+            date_start = st.date_input("Starting Date", date1)
         with col2:
-            date_end = st.date_input("Ending Date", pd.Timestamp(2024, 6, 30))
+            date_end = st.date_input("Ending Date", date2)
         st.divider()
 
         date_start = date_start.strftime("%Y%m%d")

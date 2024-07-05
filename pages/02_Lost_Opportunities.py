@@ -6,6 +6,7 @@ from snowflake.snowpark import Session
 from pathlib import Path
 from configparser import ConfigParser
 from check_pwd import check_password
+from datetime import date, timedelta
 
 
 @st.cache_data
@@ -114,12 +115,17 @@ def main():
         axis=1,
     )
 
+    date1 = date.today()
+    date1 = date(date1.year, date1.month, 1) - timedelta(days=1)
+    date1 = date(date1.year, date1.month, 1)
+    date2 = date(date1.year, date1.month, 28) + timedelta(days=4)
+    date2 = date2 - timedelta(days=date2.day)
     col1, col2, col3 = st.columns(3)
     with col1:
-        date_start = st.date_input("Starting Date", pd.Timestamp(2024, 5, 1))
+        date_start = st.date_input("Starting Date", date1)  # pd.Timestamp(2024, 6, 1)
         date_start = pd.to_datetime(date_start)
     with col2:
-        date_end = st.date_input("Ending Date", pd.Timestamp(2024, 5, 31))
+        date_end = st.date_input("Ending Date", date2)  #  pd.Timestamp(2024, 6, 30)
         date_end = pd.to_datetime(date_end)
     with col3:
         with_threshhold = st.toggle("With threshhold?", True)

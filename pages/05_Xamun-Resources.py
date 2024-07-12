@@ -131,11 +131,12 @@ def main():
         date_end = date_end.strftime("%Y%m%d")
 
         df_emp, df_eod = load_data()
-        df_emp_active = df_emp.loc[(df_emp["RESIGNED"] == False)]
+
+        # change SwiftLoan into Xamun Solutions
         df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"
-        df_dd = df_emp_active.loc[
-            (~df_emp_active["GRP"].str.upper().str.startswith("X"))
-        ]
+
+        # df_dd = df_emp.loc[(~df_emp["GRP"].str.upper().str.startswith("X"))]
+        df_dd = df_emp.loc[(~df_emp["GRP"].str.startswith("X"))]
 
         # filter by date range and filter-out non Xamun accts
         df_eod_xamun_projs = df_eod.loc[
@@ -157,7 +158,7 @@ def main():
         interns = (
             df_eod_xamun_projs.loc[
                 (
-                    ~df_eod_xamun_projs["EmployeeName"].isin(df_emp_active["Employee"]),
+                    ~df_eod_xamun_projs["EmployeeName"].isin(df_emp["Employee"]),
                     "EmployeeName",
                 )
             ]
@@ -625,11 +626,11 @@ def main():
                 "Remarks": "Jr Flutter",
                 "Group": "Xamun Core Support",
             },
-            {
-                "Employee": "Jean May Alvarez",
-                "Remarks": "Mid Flutter",
-                "Group": "Xamun Core Support",
-            },
+            # {
+            #     "Employee": "Jean May Alvarez",
+            #     "Remarks": "Mid Flutter",
+            #     "Group": "Xamun Core Support",
+            # },
             {
                 "Employee": "Kevin Paul Merwa",
                 "Remarks": "Jr Backend",
@@ -703,57 +704,57 @@ def main():
             {
                 "Employee": "Brain Tumibay",
                 "Remarks": "",
-                "Group": "DD - by July",
+                "Group": "",
             },
             {
                 "Employee": "Dino Angelo Reyes",
-                "Remarks": "",
-                "Group": "DD - by July",
+                "Remarks": "TMG R&D",
+                "Group": "",
             },
             {
                 "Employee": "Eduard Hinunangan",
                 "Remarks": "",
-                "Group": "DD - by July",
+                "Group": "",
             },
             {
                 "Employee": "Jansen Neil Olay",
                 "Remarks": "",
-                "Group": "DD - by July",
+                "Group": "",
             },
             {
                 "Employee": "Joseph Artillaga",
-                "Remarks": "",
-                "Group": "DD - by July",
+                "Remarks": "DOON",
+                "Group": "",
             },
             {
                 "Employee": "Marc Alvin Villarin ",
                 "Remarks": "",
-                "Group": "DD - by July",
+                "Group": "",
             },
             {
                 "Employee": "Raymun Galvez",
-                "Remarks": "",
-                "Group": "DD - by July",
+                "Remarks": "DOON & TMG R&D",
+                "Group": "",
             },
             {
                 "Employee": "Dominic Glenn Zabala",
-                "Remarks": "",
-                "Group": "DD - by July 7",
+                "Remarks": "R&D",
+                "Group": "",
             },
             {
                 "Employee": "Ivan Joshua Merete",
                 "Remarks": "",
-                "Group": "DD - by July 7",
+                "Group": "",
             },
             {
                 "Employee": "Irish Quilla",
-                "Remarks": "PM (in exchange of Melody Nones)",
-                "Group": "DD - by July 7",
+                "Remarks": "",
+                "Group": "",
             },
             {
                 "Employee": "Krischell Villadulid",
                 "Remarks": "",
-                "Group": "DD - by July 7",
+                "Group": "",
             },
         ]
 

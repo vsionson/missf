@@ -10,7 +10,7 @@ from check_pwd import check_password
 from datetime import date, timedelta
 
 
-xamun_projs = [
+XAMUN_PROJS = [
     "Xamun",
     "Xamun Delivery",
     "Advance Energy",
@@ -19,6 +19,16 @@ xamun_projs = [
     "Steer Marketplace",
     "ePCSO",
     "AE Project 2 WebUI",
+]
+
+XAMUN_CORE = [
+    "Allen Christian Tubo",
+    "Avik Das",
+    "Cyrill Binaohan",
+    "John Aldrich Callado",
+    "Maricar Mara",
+    "Sarah Jane Rosales",
+    "Von Lou Velle Segocio",
 ]
 
 
@@ -41,7 +51,17 @@ def load_data():
 
     session.close()
 
-    _df_employee = _df_employee.rename(columns={"EMPLOYEE": "Employee"})
+    _df_employee = _df_employee.rename(
+        columns={
+            "EMPLOYEE": "Employee",
+            "RESIGNED": "Resigned",
+            "LASTDAY": "LastDay",
+            "RANK": "Rank",
+            "LEVEL": "Level",
+            "START_DATE": "StartDate",
+            "ACCOUNT": "Account",
+        }
+    )
     _df_eod = _df_eod.rename(
         columns={
             "EMPLOYEE": "EmployeeName",
@@ -80,7 +100,16 @@ def load_data2():
 
     _df_emp = pd.read_excel(
         file_name_billing,
-        usecols=["Employee", "GRP", "Resigned"],
+        usecols=[
+            "Employee",
+            "GRP",
+            "Resigned",
+            "LastDay",
+            "Rank",
+            "Level",
+            "Start",
+            "Acct",
+        ],
         sheet_name="employees",
     )
 
@@ -99,8 +128,9 @@ def load_data2():
                 ]
             )
         ),
-        ["Employee", "GRP"],
+        # ["Employee", "GRP"],
     ]
+    _df_emp = _df_emp.rename(columns={"Acct": "Account"})
 
     return _df_emp, _df_eod
 
@@ -142,12 +172,12 @@ def main():
         df_eod_xamun_projs = df_eod.loc[
             (df_eod["Date"] >= date_start)
             & (df_eod["Date"] <= date_end)
-            & (df_eod.Account.isin(xamun_projs))
+            & (df_eod.Account.isin(XAMUN_PROJS))
         ]
         df_eod_xamun_projs_with_da = df_eod.loc[
             (df_eod["Date"] >= date_start)
             & (df_eod["Date"] <= date_end)
-            & (df_eod.Account.isin(xamun_projs + ["Data Analytics"]))
+            & (df_eod.Account.isin(XAMUN_PROJS + ["Data Analytics"]))
         ]
         df_analytics = df_eod.loc[
             (df_eod.Date >= date_start)
@@ -415,18 +445,7 @@ def main():
             (~df_eod_xamun_projs.EmployeeName.isin(interns))
             & (~df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
             & (df_eod_xamun_projs["Account"] == "Xamun")
-            & (
-                df_eod_xamun_projs["EmployeeName"].isin(
-                    [
-                        "Allen Christian Tubo",
-                        "Avik Das",
-                        "Cyrill Binaohan",
-                        "John Aldrich Callado",
-                        "Maricar Mara",
-                        "Sarah Jane Rosales",
-                    ]
-                )
-            )
+            & (df_eod_xamun_projs["EmployeeName"].isin(XAMUN_CORE))
         ]
         _df = (
             _df.groupby(["EmployeeName"], as_index=False)
@@ -457,18 +476,7 @@ def main():
             (~df_eod_xamun_projs.EmployeeName.isin(interns))
             & (~df_eod_xamun_projs.EmployeeName.isin(df_dd.Employee))
             & (df_eod_xamun_projs["Account"] == "Xamun")
-            & (
-                ~df_eod_xamun_projs["EmployeeName"].isin(
-                    [
-                        "Allen Christian Tubo",
-                        "Avik Das",
-                        "Cyrill Binaohan",
-                        "John Aldrich Callado",
-                        "Maricar Mara",
-                        "Sarah Jane Rosales",
-                    ]
-                )
-            )
+            & (~df_eod_xamun_projs["EmployeeName"].isin(XAMUN_CORE))
         ]
         _df = (
             _df.groupby(["EmployeeName"], as_index=False)
@@ -613,68 +621,44 @@ def main():
             {"Employee": "John Aldrich Callado", "Remarks": "Sr. Flutter"},
             {"Employee": "Maricar Mara", "Remarks": "PM"},
             {"Employee": "Sarah Jane Rosales", "Remarks": "Tester"},
+            {"Employee": "Von Lou Velle Segocio", "Remarks": "Mid FrontEnd"},
         ]
 
         the_rest2 = [
             {
+                "Employee": "Aevin Earl Molina",
+                "Remarks": "",
+                "Group": "Xamun Content",
+            },
+            {
+                "Employee": "Brain Tumibay",
+                "Remarks": "Sr Web/Solution Architect",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Dharyll Jan Calaliman",
+                "Remarks": "",
+                "Group": "Xamun Delivery-QRI",
+            },
+            {
+                "Employee": "Dino Angelo Reyes",
+                "Remarks": "Web Dev",
+                "Group": "BPS",
+            },
+            {
+                "Employee": "Dominic Glenn Zabala",
+                "Remarks": "Web Dev",
+                "Group": "Smart Pen R&D",
+            },
+            {
+                "Employee": "Eduard Hinunangan",
+                "Remarks": "Web Dev",
+                "Group": "Avensys POC",
+            },
+            {
                 "Employee": "Erskine Roy Bornillo",
                 "Remarks": "Jr Backend",
                 "Group": "Xamun Core Support",
-            },
-            {
-                "Employee": "Ira Louise David",
-                "Remarks": "Jr Flutter",
-                "Group": "Xamun Core Support",
-            },
-            # {
-            #     "Employee": "Jean May Alvarez",
-            #     "Remarks": "Mid Flutter",
-            #     "Group": "Xamun Core Support",
-            # },
-            {
-                "Employee": "Kevin Paul Merwa",
-                "Remarks": "Jr Backend",
-                "Group": "Xamun Core Support",
-            },
-            {
-                "Employee": "Noel Guevarra",
-                "Remarks": "Mid Flutter",
-                "Group": "Xamun Core Support",
-            },
-            {
-                "Employee": "Von Lou Velle Segocio",
-                "Remarks": "Mid FrontEnd",
-                "Group": "Xamun Core Support",
-            },
-            {
-                "Employee": "Aevin Earl Molina",
-                "Remarks": "",
-                "Group": "Xamun Product",
-            },
-            {
-                "Employee": "Janicah Lorra Cequeña",
-                "Remarks": "Tester",
-                "Group": "Xamun Delivery",
-            },
-            {
-                "Employee": "Jomar Lagunsad",
-                "Remarks": "PM",
-                "Group": "Xamun Delivery",
-            },
-            {
-                "Employee": "Lauren James Leal",
-                "Remarks": "Backend",
-                "Group": "Xamun Delivery",
-            },
-            {
-                "Employee": "Mark Rayden Mirafuente",
-                "Remarks": "Jr Frontend",
-                "Group": "Xamun Delivery",
-            },
-            {
-                "Employee": "Ma. Ethel Yatar",
-                "Remarks": "Sr Tester",
-                "Group": "Xamun Delivery",
             },
             {
                 "Employee": "Glen Ebina",
@@ -682,68 +666,8 @@ def main():
                 "Group": "Design",
             },
             {
-                "Employee": "Dharyll Jan Calaliman",
-                "Remarks": "",
-                "Group": "QRI",
-            },
-            {
-                "Employee": "Jayson Echano",
-                "Remarks": "",
-                "Group": "QRI",
-            },
-            {
-                "Employee": "Jessica Joy Angeles",
-                "Remarks": "",
-                "Group": "QRI",
-            },
-            {
-                "Employee": "Jomari Munsayac",
-                "Remarks": "",
-                "Group": "QRI",
-            },
-            {
-                "Employee": "Brain Tumibay",
-                "Remarks": "",
-                "Group": "",
-            },
-            {
-                "Employee": "Dino Angelo Reyes",
-                "Remarks": "TMG R&D",
-                "Group": "",
-            },
-            {
-                "Employee": "Eduard Hinunangan",
-                "Remarks": "",
-                "Group": "",
-            },
-            {
-                "Employee": "Jansen Neil Olay",
-                "Remarks": "",
-                "Group": "",
-            },
-            {
-                "Employee": "Joseph Artillaga",
-                "Remarks": "DOON",
-                "Group": "",
-            },
-            {
-                "Employee": "Marc Alvin Villarin ",
-                "Remarks": "",
-                "Group": "",
-            },
-            {
-                "Employee": "Raymun Galvez",
-                "Remarks": "DOON & TMG R&D",
-                "Group": "",
-            },
-            {
-                "Employee": "Dominic Glenn Zabala",
-                "Remarks": "R&D",
-                "Group": "",
-            },
-            {
-                "Employee": "Ivan Joshua Merete",
-                "Remarks": "",
+                "Employee": "Ira Louise David",
+                "Remarks": "Jr Flutter",
                 "Group": "",
             },
             {
@@ -752,17 +676,96 @@ def main():
                 "Group": "",
             },
             {
-                "Employee": "Krischell Villadulid",
+                "Employee": "Ivan Joshua Merete",
+                "Remarks": "Web Dev",
+                "Group": "BPS",
+            },
+            # {
+            #     "Employee": "Jean May Alvarez",
+            #     "Remarks": "Mid Flutter",
+            #     "Group": "Xamun Core Support",
+            # },
+            {
+                "Employee": "Janicah Lorra Cequeña",
+                "Remarks": "Tester",
+                "Group": "Solviva, Avensys POC",
+            },
+            {
+                "Employee": "Jansen Neil Olay",
+                "Remarks": "Web Dev",
+                "Group": "Avensys POC",
+            },
+            {
+                "Employee": "Jayson Echano",
+                "Remarks": "Mobile Dev",
+                "Group": "X-QRI",
+            },
+            {
+                "Employee": "Jessica Joy Angeles",
+                "Remarks": "Tester",
+                "Group": "DOON, Ramcar",
+            },
+            {
+                "Employee": "Jomar Lagunsad",
+                "Remarks": "PM",
+                "Group": "Xamun Delivery",
+            },
+            {
+                "Employee": "Jomari Munsayac",
                 "Remarks": "",
-                "Group": "",
+                "Group": "QRI",
+            },
+            {
+                "Employee": "Joseph Artillaga",
+                "Remarks": "Web Dev",
+                "Group": "DOON",
+            },
+            {
+                "Employee": "Kevin Paul Merwa",
+                "Remarks": "Jr Backend",
+                "Group": "Xamun Core Support",
+            },
+            {
+                "Employee": "Krischell Villadulid",
+                "Remarks": "Web Dev",
+                "Group": "Avensys POC",
+            },
+            {
+                "Employee": "Lauren James Leal",
+                "Remarks": "Web Dev",
+                "Group": "Karl Group",
+            },
+            {
+                "Employee": "Ma. Ethel Yatar",
+                "Remarks": "Sr Tester",
+                "Group": "Xamun Delivery, Karl Group",
+            },
+            {
+                "Employee": "Marc Alvin Villarin ",
+                "Remarks": "Tester",
+                "Group": "BPS, iScan",
+            },
+            {
+                "Employee": "Mark Rayden Mirafuente",
+                "Remarks": "Jr Frontend",
+                "Group": "TMG R&D, BPS",
+            },
+            {
+                "Employee": "Noel Guevarra",
+                "Remarks": "Mid Flutter",
+                "Group": "Xamun Delivery, TMG",
+            },
+            {
+                "Employee": "Raymun Galvez",
+                "Remarks": "Web Dev",
+                "Group": "DOON & TMG R&D",
             },
         ]
 
-        df_xamun_teams2 = pd.DataFrame(platform2)
+        df_xamun_teams2 = (
+            pd.DataFrame(platform2).sort_values(by="Employee").reset_index()
+        )
         df_xamun_teams2.index += 1
-
-        df_xamun_teams3 = pd.DataFrame(the_rest2)
-        df_xamun_teams3.index += 1
 
         fig = go.Figure(
             data=[
@@ -813,9 +816,17 @@ def main():
             ]
         )
         # st.header("FTE Distribution")
-        fig.update_layout(height=400)
+        fig.update_layout(height=500)
         fig.update_layout(title_text="FTE Distribution - Xamun Core")
         st.plotly_chart(fig, use_container_width=True)  # , height=600)
+
+        is_sorted_by_grp = st.checkbox("Sort by Group?")
+        df_xamun_teams3 = (
+            pd.DataFrame(the_rest2)
+            .sort_values(by=["Group", "Employee"] if is_sorted_by_grp else ["Employee"])
+            .reset_index()
+        )
+        df_xamun_teams3.index += 1
 
         fig = go.Figure(
             data=[
@@ -871,16 +882,22 @@ def main():
         is_active = st.checkbox("Active", value=True)
         is_resigned = st.checkbox("Resigned", value=False)
 
-        acct = st.text_input("Account (case-sensitive)")
+        df_emp_copy = df_emp.loc[
+            ((df_emp["Resigned"] != is_active) | (df_emp["Resigned"] == is_resigned))
+        ]
+        df_emp_copy["Account"] = df_emp_copy["Account"].fillna("nan")
+        acct_list = df_emp_copy["Account"].unique().tolist()
+        acct_list.sort()
+        selected_accts = st.multiselect("Account", options=acct_list, default=acct_list)
 
         if is_active or is_resigned:
             st.dataframe(
-                df_emp.loc[
-                    (
-                        (df_emp["RESIGNED"] != is_active)
-                        | (df_emp["RESIGNED"] == is_resigned)
-                    )
-                    & (df_emp["ACCOUNT"].str.startswith(acct))
+                df_emp_copy.loc[
+                    # (
+                    #     (df_emp["RESIGNED"] != is_active)
+                    #     | (df_emp["RESIGNED"] == is_resigned)
+                    # ) &
+                    (df_emp["Account"].isin(selected_accts))
                 ],
                 width=900,
                 height=600,

@@ -25,7 +25,7 @@ def load_data():
     _df_sales = session.sql("select * from DB_MIS.SALES.SALES").to_pandas()
     _df_holiday = session.sql("select * from DB_MIS.SALES.HOLIDAY").to_pandas()
     _df_invoice = session.sql(
-        "select INV_AMOUNT,PAYMENT_AMOUNT,TX_TYPE,INV_YR,INV_MON,PAYMENT_YR,PAYMENT_MON from DB_MIS.SALES.INVOICE"
+        "select CLIENT,INV_DATE,DUE_DATE,INV_AMOUNT,DATE_PAID,PAYMENT_AMOUNT,TX_TYPE,INV_YR,INV_MON,PAYMENT_YR,PAYMENT_MON from DB_MIS.SALES.INVOICE"
     ).to_pandas()
 
     session.close()
@@ -111,7 +111,7 @@ def load_data2():
         file_name_invoice,
         sheet_name="Raw",
     )
-    _df_invoice = _df_invoice.drop(["CURRENCY", "STATUS"], axis=1)
+    _df_invoice = _df_invoice.drop(["CURRENCY"], axis=1)
 
     _df_invoice["INV_DATE"] = _df_invoice["INV_DATE"].astype("datetime64[ns]")
     _df_invoice["DATE_PAID"] = _df_invoice["DATE_PAID"].astype("datetime64[ns]")
@@ -119,11 +119,6 @@ def load_data2():
     _df_invoice["PAYMENT_YR"] = _df_invoice.apply(lambda x: x["DATE_PAID"].year, axis=1)
     # _df_invoice = _df_invoice.loc[:4]
 
-    _df_invoice = _df_invoice.loc[
-        (_df_invoice["INV_YR"] == 2024)
-        & (_df_invoice["INV_AMOUNT"] != 33333.34)
-        & (_df_invoice["INV_AMOUNT"] != 70901.49)
-    ]
     return _df_sales, _df_holiday, _df_invoice
 
 
@@ -246,7 +241,6 @@ def okr(df):
     df_conc = pd.concat([piv_inv, piv_payment], axis=1)
     df_conc.fillna(0, inplace=True)
 
-    # df = df.loc[:4]
     no_of_rows_aka_columns = len(df_conc) + 2
 
     amts_array = [
@@ -354,7 +348,6 @@ def okr(df):
     fig = go.Figure(
         data=[
             go.Table(
-                # columnorder=arange(1, len(df)+2)
                 columnorder=[i for i in range(1, no_of_rows_aka_columns + 1)],
                 columnwidth=[5 for _ in range(1, no_of_rows_aka_columns + 1)],
                 header=dict(
@@ -389,17 +382,42 @@ def okr(df):
             )
         ]
     )
-    st.header("Revenues and Collections")
-    fig.update_layout(height=600, width=1200)
-    st.plotly_chart(fig, use_container_width=True, height=600)
+    with st.container():
+        st.header("Revenues and Collections")
+        fig.update_layout(height=600, width=1200)
+        st.plotly_chart(fig, use_container_width=True, height=600)
 
-    df = pd.DataFrame(
+        if st.toggle("Show data?"):
+            st.header("Data")
+
+            choices = st.multiselect(
+                "Engagement Type:", ["d", "x", "f"], ["d", "x", "f"]
+            )
+
+            is_paid = st.checkbox("Outstanding only?")
+
+            st.dataframe(
+                data=df.loc[
+                    (df["TX_TYPE"].isin(choices))
+                    & (df["PAYMENT_AMOUNT"].isna() if is_paid else True),
+                    [
+                        "CLIENT",
+                        "INV_DATE",
+                        "DUE_DATE",
+                        "INV_AMOUNT",
+                        "DATE_PAID",
+                        "PAYMENT_AMOUNT",
+                    ],
+                ].sort_values(by=["CLIENT", "INV_DATE"])
+            )
+
+    _df = pd.DataFrame(
         {
             "Type": ["DD", "Xamun", "FixedPrice"],
             "Revenue": [dd_invoiced * 58, xamun_invoiced, fp_invoiced],
         }
     )
-    fig = px.pie(df, values="Revenue", names="Type", title="Invoiced To-date(Php)")
+    fig = px.pie(_df, values="Revenue", names="Type", title="Invoiced To-date(Php)")
     fig.update_layout(height=600)
     st.plotly_chart(fig, use_container_width=True, height=600)
     return None
@@ -448,6 +466,16 @@ def main():
 
         df_rates, df_holiday, df_invoice = load_data()
 
+        df_invoice = df_invoice.loc[
+            (df_invoice["INV_YR"] >= 2024)
+            & ~(
+                (
+                    (df_invoice["INV_AMOUNT"] == 33333.34)
+                    | (df_invoice["INV_AMOUNT"] == 70901.49)
+                )
+                & (df_invoice["CLIENT"] == "Technology Integration Group")
+            )
+        ]
         df_rates = df_rates.query("PERIOD >= @date_start")
         df_rates["Billable"] = df_rates["TARGET"] * df_rates["INIT_RATE"]
         df_rates["LossHrs"] = df_rates["TARGET"] - df_rates["BILLED"]

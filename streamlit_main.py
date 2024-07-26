@@ -47,7 +47,7 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "BAI_WH",
+        "warehouse": st.secrets.connections.snowflake.warehouse,
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
@@ -315,8 +315,17 @@ def main():
         #
         # ---------------------------------------------
 
-        fig = px.histogram(
-            df_since_2023,
+        # fig = px.histogram(
+        #     df_since_2023,
+        #     x="REPORTDATE",
+        #     y="COST",
+        #     text_auto=True,
+        #     template="seaborn",
+        #     opacity=0.89,
+        #     title="Monthly Cost",
+        # )
+        fig = px.bar(
+            df_since_2023.groupby(["REPORTDATE"], as_index=False).agg({"COST": sum}),
             x="REPORTDATE",
             y="COST",
             text_auto=True,

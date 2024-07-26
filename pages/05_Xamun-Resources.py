@@ -39,15 +39,15 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "BAI_WH",
+        "warehouse": st.secrets.connections.snowflake.warehouse,
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
     session = Session.builder.configs(connection_parameters).create()
 
-    _df_employee = session.sql("select * from DB_MIS.SALES.EMPLOYEE").to_pandas()
+    _df_employee = session.sql("select * from DB_MIS.PUBLIC.EMPLOYEE").to_pandas()
 
-    _df_eod = session.sql("select * from DB_MIS.SALES.EOD").to_pandas()
+    _df_eod = session.sql("select * from DB_MIS.PUBLIC.EOD").to_pandas()
 
     session.close()
 
@@ -505,27 +505,27 @@ def main():
         #
         #####################################################################
 
-        _df = (
-            df_analytics.groupby(
-                ["Account", "EmployeeName"], as_index=False
-            ).TotalHrs.sum()
-        ).sort_values("EmployeeName")
+        # _df = (
+        #     df_analytics.groupby(
+        #         ["Account", "EmployeeName"], as_index=False
+        #     ).TotalHrs.sum()
+        # ).sort_values("EmployeeName")
 
-        total_hrs = "{0:.2f}".format(_df.TotalHrs.sum())
-        st.write(total_hrs)
-        fig = px.bar(
-            _df,
-            x="EmployeeName",
-            y="TotalHrs",
-            color="Account",
-            text_auto=True,
-            title=f"Data Analytics ({_df.EmployeeName.nunique()} FTEs; {total_hrs} hrs)",
-            hover_data=["Account", "TotalHrs"],
-            template="ggplot2",
-        )
-        fig.update_traces(texttemplate="%{y:.2f}")
-        fig.update_xaxes(title_text="")
-        st.plotly_chart(fig, use_container_width=True)
+        # total_hrs = "{0:.2f}".format(_df.TotalHrs.sum())
+        # st.write(total_hrs)
+        # fig = px.bar(
+        #     _df,
+        #     x="EmployeeName",
+        #     y="TotalHrs",
+        #     color="Account",
+        #     text_auto=True,
+        #     title=f"Data Analytics ({_df.EmployeeName.nunique()} FTEs; {total_hrs} hrs)",
+        #     hover_data=["Account", "TotalHrs"],
+        #     template="ggplot2",
+        # )
+        # fig.update_traces(texttemplate="%{y:.2f}")
+        # fig.update_xaxes(title_text="")
+        # st.plotly_chart(fig, use_container_width=True)
 
         ################################################################
         if st.toggle("Show FTEs based on EOD?"):
@@ -627,58 +627,69 @@ def main():
         the_rest2 = [
             {
                 "Employee": "Aevin Earl Molina",
-                "Remarks": "",
+                "Remarks": "Web Dev",
                 "Group": "Xamun Content",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Brain Tumibay",
                 "Remarks": "Sr Web/Solution Architect",
                 "Group": "Xamun Delivery",
+                "Billable Proj": "BPS, Karl, Avensys POC",
             },
             {
                 "Employee": "Dharyll Jan Calaliman",
-                "Remarks": "",
-                "Group": "Xamun Delivery-QRI",
+                "Remarks": "Mobile Dev",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS",
             },
             {
                 "Employee": "Dino Angelo Reyes",
                 "Remarks": "Web Dev",
-                "Group": "BPS",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS",
             },
             {
                 "Employee": "Dominic Glenn Zabala",
                 "Remarks": "Web Dev",
-                "Group": "Smart Pen R&D",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Smart Pen R&D",
             },
             {
                 "Employee": "Eduard Hinunangan",
                 "Remarks": "Web Dev",
-                "Group": "Avensys POC",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Avensys POC",
             },
             {
                 "Employee": "Erskine Roy Bornillo",
                 "Remarks": "Jr Backend",
                 "Group": "Xamun Core Support",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Glen Ebina",
                 "Remarks": "UI/UX",
                 "Group": "Design",
+                "Billable Proj": "DOON,BPS,ShellPower",
             },
             {
                 "Employee": "Ira Louise David",
                 "Remarks": "Jr Flutter",
-                "Group": "",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS",
             },
             {
                 "Employee": "Irish Quilla",
-                "Remarks": "",
-                "Group": "",
+                "Remarks": "PM",
+                "Group": "Xamun Delivery/Swiftloan/Steer",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Ivan Joshua Merete",
                 "Remarks": "Web Dev",
-                "Group": "BPS",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS",
             },
             # {
             #     "Employee": "Jean May Alvarez",
@@ -688,77 +699,92 @@ def main():
             {
                 "Employee": "Janicah Lorra Cequeña",
                 "Remarks": "Tester",
-                "Group": "Solviva, Avensys POC",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Solviva, Avensys POC, Atlas Home",
             },
             {
                 "Employee": "Jansen Neil Olay",
                 "Remarks": "Web Dev",
-                "Group": "Avensys POC",
+                "Group": "Xamun Delivery/Design Studio",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Jayson Echano",
                 "Remarks": "Mobile Dev",
-                "Group": "X-QRI",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS",
             },
             {
                 "Employee": "Jessica Joy Angeles",
                 "Remarks": "Tester",
-                "Group": "DOON, Ramcar",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "DOON, Ramcar",
             },
             {
                 "Employee": "Jomar Lagunsad",
                 "Remarks": "PM",
                 "Group": "Xamun Delivery",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Jomari Munsayac",
-                "Remarks": "",
+                "Remarks": "Tester",
                 "Group": "QRI",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Joseph Artillaga",
                 "Remarks": "Web Dev",
-                "Group": "DOON",
+                "Group": "Xamun Delivery/Design Studio",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Kevin Paul Merwa",
                 "Remarks": "Jr Backend",
                 "Group": "Xamun Core Support",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Krischell Villadulid",
                 "Remarks": "Web Dev",
-                "Group": "Avensys POC",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Avensys POC",
             },
             {
                 "Employee": "Lauren James Leal",
                 "Remarks": "Web Dev",
-                "Group": "Karl Group",
+                "Group": "Xamun Delivery/Design Studio",
+                "Billable Proj": "Karl Group",
             },
             {
                 "Employee": "Ma. Ethel Yatar",
                 "Remarks": "Sr Tester",
-                "Group": "Xamun Delivery, Karl Group",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Karl Group, Shell Group",
             },
             {
                 "Employee": "Marc Alvin Villarin ",
                 "Remarks": "Tester",
-                "Group": "BPS, iScan",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "BPS, iScan",
             },
             {
                 "Employee": "Mark Rayden Mirafuente",
                 "Remarks": "Jr Frontend",
-                "Group": "TMG R&D, BPS",
+                "Group": "Xamun Delivery/TMG R&D",
+                "Billable Proj": "",
             },
             {
                 "Employee": "Noel Guevarra",
                 "Remarks": "Mid Flutter",
-                "Group": "Xamun Delivery, TMG",
+                "Group": "Xamun Delivery/Steer Mobile for Xamun",
+                "Billable Proj": "BPS",
             },
             {
                 "Employee": "Raymun Galvez",
                 "Remarks": "Web Dev",
-                "Group": "DOON & TMG R&D",
+                "Group": "TMG R&D",
+                "Billable Proj": "",
             },
         ]
 
@@ -831,14 +857,15 @@ def main():
         fig = go.Figure(
             data=[
                 go.Table(
-                    columnorder=[1, 2, 3, 4],
-                    columnwidth=[1, 5, 5, 5],
+                    columnorder=[1, 2, 3, 4, 5],
+                    columnwidth=[1, 4, 4, 5, 5],
                     header=dict(
                         values=[
                             ["<b>LINE #</b>"],
                             ["<b>Name</b>"],
                             ["<b>Remarks</b>"],
                             ["<b>Group</b>"],
+                            ["<b>Billable Project</b>"],
                         ],
                         line_color="darkslategray",
                         fill_color="royalblue",
@@ -852,6 +879,7 @@ def main():
                             df_xamun_teams3.Employee,
                             df_xamun_teams3.Remarks,
                             df_xamun_teams3["Group"],
+                            df_xamun_teams3["Billable Proj"],
                         ],
                         line_color="darkslategray",
                         fill=dict(
@@ -860,7 +888,7 @@ def main():
                                 "white",
                             ]
                         ),
-                        align=["center", "left", "center"],
+                        align=["center", "left", "left", "left"],
                         # font_size=12,
                         font=dict(color="black", size=16),
                         height=30,

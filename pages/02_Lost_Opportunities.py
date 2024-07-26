@@ -16,13 +16,13 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "BAI_WH",
+        "warehouse": st.secrets.connections.snowflake.warehouse,
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
     session = Session.builder.configs(connection_parameters).create()
 
-    _df_sales = session.sql("select * from DB_MIS.SALES.SALES").to_pandas()
+    _df_sales = session.sql("select * from DB_MIS.PUBLIC.SALES").to_pandas()
 
     session.close()
 

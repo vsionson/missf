@@ -5,13 +5,13 @@ from snowflake.snowpark.functions import col
 import streamlit as st
 
 connection_parameters = {
-    "user": "Stamina2072",
-    "password": "HLqJt&b29o^F9PmWU^WFx^VBK3",
-    "account": "lfcrltl-kt26515",
-    "role": "SYSADMIN",
-    "warehouse": "WH_MIS",
+    "user": "Cozily5399",
+    "password": "#3A9#^xGF29ii$TJ2%8Bef2ASzpk#eSQ",
+    "account": "vnyurlw-dn22987",
+    "role": "ACCOUNTADMIN",
+    "warehouse": "COMPUTE_WH",
     "database": "DB_MIS",
-    "schema": "AZURE",
+    "schema": "PUBLIC",
 }
 
 
@@ -26,40 +26,42 @@ connection_parameters = {
 
 file_name = [
     (
-        "/Users/shaun/projects/mis/data/data.xlsx",  # Excel file
+        # "/Users/shaun/projects/mis/data/data.xlsx",  # Excel file
+        "/Users/shaun/projects/mis/data/Azure Usage 2024-06.xlsx",  # Excel file
         "Sheet1",  # sheet
-        "/Users/shaun/projects/mis/data/csv/azure.csv",  # csv file
-        "@db_mis.azure.crayon",  # stage name
+        # "/Users/shaun/projects/mis/data/csv/azure.csv",  # csv file
+        "/Users/shaun/projects/mis/data/csv/azure_2024_06.csv",  # csv file
+        "@db_mis.public.crayon",  # stage name
     ),
     (
         "/Users/shaun/eod/BAI EOD Log Report V2.xlsx",
         "data",
         "/Users/shaun/projects/mis/data/csv/eod.csv",
-        "@db_mis.sales.eod",
+        "@db_mis.public.eod",
     ),
     (
         "/Users/shaun/Documents/BAI Collections as of date.xlsx",
         "Raw",
         "/Users/shaun/projects/mis/data/csv/collections.csv",
-        "@db_mis.sales.collections",
+        "@db_mis.public.collections",
     ),
     (
         "/Users/shaun/Documents/Billing v3.0.xlsx",
         "RateCard",
         "/Users/shaun/projects/mis/data/csv/ratecard.csv",
-        "@db_mis.sales.ratecard",
+        "@db_mis.public.ratecard",
     ),
     (
         "/Users/shaun/Documents/Billing v3.0.xlsx",
         "employees",
         "/Users/shaun/projects/mis/data/csv/employees.csv",
-        "@db_mis.sales.employee",
+        "@db_mis.public.employee",
     ),
     (
         "/Users/shaun/Documents/Billing v3.0.xlsx",
         "Holidays",
         "/Users/shaun/projects/mis/data/csv/holidays.csv",
-        "@db_mis.sales.holidays",
+        "@db_mis.public.holidays",
     ),
 ]
 

@@ -16,16 +16,16 @@ def load_data():
         "password": st.secrets.connections.snowflake.password,
         "account": st.secrets.connections.snowflake.account,
         "role": st.secrets.connections.snowflake.role,
-        "warehouse": "BAI_WH",
+        "warehouse": st.secrets.connections.snowflake.warehouse,
         "database": st.secrets.connections.snowflake.database,
         "schema": st.secrets.connections.snowflake.schema,
     }
     session = Session.builder.configs(connection_parameters).create()
 
-    _df_sales = session.sql("select * from DB_MIS.SALES.SALES").to_pandas()
-    _df_holiday = session.sql("select * from DB_MIS.SALES.HOLIDAY").to_pandas()
+    _df_sales = session.sql("select * from DB_MIS.PUBLIC.SALES").to_pandas()
+    _df_holiday = session.sql("select * from DB_MIS.PUBLIC.HOLIDAY").to_pandas()
     _df_invoice = session.sql(
-        "select CLIENT,INV_DATE,DUE_DATE,INV_AMOUNT,DATE_PAID,PAYMENT_AMOUNT,TX_TYPE,INV_YR,INV_MON,PAYMENT_YR,PAYMENT_MON from DB_MIS.SALES.INVOICE"
+        "select CLIENT,INV_DATE,DUE_DATE,INV_AMOUNT,DATE_PAID,PAYMENT_AMOUNT,TX_TYPE,INV_YR,INV_MON,PAYMENT_YR,PAYMENT_MON from DB_MIS.PUBLIC.INVOICE"
     ).to_pandas()
 
     session.close()
@@ -113,10 +113,17 @@ def load_data2():
     )
     _df_invoice = _df_invoice.drop(["CURRENCY"], axis=1)
 
-    _df_invoice["INV_DATE"] = _df_invoice["INV_DATE"].astype("datetime64[ns]")
-    _df_invoice["DATE_PAID"] = _df_invoice["DATE_PAID"].astype("datetime64[ns]")
     _df_invoice["INV_YR"] = _df_invoice.apply(lambda x: x["INV_DATE"].year, axis=1)
     _df_invoice["PAYMENT_YR"] = _df_invoice.apply(lambda x: x["DATE_PAID"].year, axis=1)
+    _df_invoice["INV_DATE"] = (
+        _df_invoice["INV_DATE"].astype("datetime64[ns]").dt.strftime("%Y-%m-%d")
+    )
+    _df_invoice["DATE_PAID"] = (
+        _df_invoice["DATE_PAID"].astype("datetime64[ns]").dt.strftime("%Y-%m-%d")
+    )
+    _df_invoice["DUE_DATE"] = (
+        _df_invoice["DUE_DATE"].astype("datetime64[ns]").dt.strftime("%Y-%m-%d")
+    )
     # _df_invoice = _df_invoice.loc[:4]
 
     return _df_sales, _df_holiday, _df_invoice
@@ -345,47 +352,49 @@ def okr(df):
 
     # final column - the totals
     values.append(arr_totals)
-    fig = go.Figure(
-        data=[
-            go.Table(
-                columnorder=[i for i in range(1, no_of_rows_aka_columns + 1)],
-                columnwidth=[5 for _ in range(1, no_of_rows_aka_columns + 1)],
-                header=dict(
-                    values=arr_columns,
-                    line_color="darkslategray",
-                    fill_color="royalblue",
-                    # align=["left", "center"],
-                    font=dict(color="white", size=16),
-                    # height=35,
-                ),
-                cells=dict(
-                    values=values,
-                    line_color="darkslategray",
-                    fill=dict(
-                        color=[
-                            "#FBE9E7",
-                            "#E3F2FD",
-                            "#E0E0E0",
-                            "#E3F2FD",
-                            "#E0E0E0",
-                            "#E3F2FD",
-                            "#E0E0E0",
-                            "#E3F2FD",
-                            "#CFD8DC",
-                        ]
-                    ),
-                    align=["center", "right"],
-                    # font_size=12,
-                    font=dict(color="black", size=16),
-                    height=30,
-                ),
-            )
-        ]
-    )
+
     with st.container():
-        st.header("Revenues and Collections")
+        st.header("Invoices and Collections")
+
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnorder=[i for i in range(1, no_of_rows_aka_columns + 1)],
+                    columnwidth=[5 for _ in range(1, no_of_rows_aka_columns + 1)],
+                    header=dict(
+                        values=arr_columns,
+                        line_color="darkslategray",
+                        fill_color="royalblue",
+                        # align=["left", "center"],
+                        font=dict(color="white", size=16),
+                        # height=35,
+                    ),
+                    cells=dict(
+                        values=values,
+                        line_color="darkslategray",
+                        fill=dict(
+                            color=[
+                                "#FBE9E7",
+                                "#E3F2FD",
+                                "#E0E0E0",
+                                "#E3F2FD",
+                                "#E0E0E0",
+                                "#E3F2FD",
+                                "#E0E0E0",
+                                "#E3F2FD",
+                                "#CFD8DC",
+                            ]
+                        ),
+                        align=["center", "right"],
+                        # font_size=12,
+                        font=dict(color="black", size=16),
+                        height=30,
+                    ),
+                )
+            ]
+        )
         fig.update_layout(height=600, width=1200)
-        st.plotly_chart(fig, use_container_width=True, height=600)
+        st.plotly_chart(fig, use_container_width=True)
 
         if st.toggle("Show data?"):
             st.header("Data")
@@ -411,15 +420,16 @@ def okr(df):
                 ].sort_values(by=["CLIENT", "INV_DATE"])
             )
 
-    _df = pd.DataFrame(
-        {
-            "Type": ["DD", "Xamun", "FixedPrice"],
-            "Revenue": [dd_invoiced * 58, xamun_invoiced, fp_invoiced],
-        }
-    )
-    fig = px.pie(_df, values="Revenue", names="Type", title="Invoiced To-date(Php)")
-    fig.update_layout(height=600)
-    st.plotly_chart(fig, use_container_width=True, height=600)
+        # with st.container():
+        _df = pd.DataFrame(
+            {
+                "Type": ["DD", "Xamun", "FixedPrice"],
+                "Revenue": [dd_invoiced * 58, xamun_invoiced, fp_invoiced],
+            }
+        )
+        fig = px.pie(_df, values="Revenue", names="Type", title="Invoiced To-date(Php)")
+        fig.update_layout(height=600)
+        st.plotly_chart(fig, use_container_width=True, height=600)
     return None
 
 

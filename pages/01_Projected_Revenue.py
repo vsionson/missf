@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, date
 import plotly.express as px
 import plotly.graph_objects as go
 from snowflake.snowpark import Session
@@ -156,7 +156,8 @@ def main_chart(df):
     )
 
     # highlight the target month (tick/x label)
-    highlighted_bar = "July 2024"
+    # highlighted_bar = "July 2024"
+    highlighted_bar = date.today().strftime("%B %Y")
     fig.update_traces(
         marker_color=["blue" if x == highlighted_bar else "#99ccff" for x in df.Month],
         textposition="inside",  # Position the text inside the bars
@@ -474,7 +475,13 @@ def main():
                 "Starting Date", pd.Timestamp(2024, 1, 1)
             ).strftime("%Y%m%d")
 
-        df_rates, df_holiday, df_invoice = load_data()
+        config = ConfigParser()
+        config.read("config.ini")
+
+        if config["datasource"]["source"] == 2:
+            df_rates, df_holiday, df_invoice = load_data2()
+        else:
+            df_rates, df_holiday, df_invoice = load_data()
 
         df_invoice = df_invoice.loc[
             (df_invoice["INV_YR"] >= 2024)

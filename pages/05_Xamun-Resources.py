@@ -114,8 +114,7 @@ def load_data2():
     )
 
     _df_emp = _df_emp.loc[
-        (_df_emp["Resigned"].str.upper() != "X")
-        & (
+        (
             ~_df_emp["Employee"].isin(
                 [
                     "Conrado Cruz",
@@ -126,12 +125,10 @@ def load_data2():
                     "TE",
                     "UI",
                 ]
-            )
-        ),
-        # ["Employee", "GRP"],
+            ),
+        )
     ]
     _df_emp = _df_emp.rename(columns={"Acct": "Account"})
-
     return _df_emp, _df_eod
 
 
@@ -160,7 +157,13 @@ def main():
         date_start = date_start.strftime("%Y%m%d")
         date_end = date_end.strftime("%Y%m%d")
 
-        df_emp, df_eod = load_data()
+        config = ConfigParser()
+        config.read("config.ini")
+
+        if config["datasource"]["source"] == 2:
+            df_emp, df_eod = load_data2()
+        else:
+            df_emp, df_eod = load_data()
 
         # change SwiftLoan into Xamun Solutions
         df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"

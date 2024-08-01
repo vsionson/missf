@@ -89,7 +89,13 @@ def main():
 
     st.title(":bar_chart: Lost Opportunities")
 
-    df = load_data()
+    config = ConfigParser()
+    config.read("config.ini")
+
+    if config["datasource"]["source"] == 2:
+        df = load_data2()
+    else:
+        df = load_data()
 
     df = df.rename(
         columns={

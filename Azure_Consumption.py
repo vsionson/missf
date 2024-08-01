@@ -102,7 +102,8 @@ def load_data2():
     arr_df.append(df_since_2023)  ## add 2023
 
     _df = pd.concat(arr_df)
-    _df["Category"] = _df["Category"].astype("category")
+    # _df = _df.dropna(how="any")
+    # _df["Category"] = _df["Category"].astype("category")
     _df = _df.rename(
         columns={
             "Category": "CATEGORY",
@@ -279,7 +280,13 @@ def main():
 
     st.title(":bar_chart: QuickReach Azure Consumption")
 
-    df_since_2023 = load_data()
+    config = ConfigParser()
+    config.read("config.ini")
+
+    if config["datasource"]["source"] == 2:
+        df_since_2023 = load_data2()
+    else:
+        df_since_2023 = load_data()
 
     df_since_2023["USAGEDATE"] = df_since_2023["USAGEDATE"].astype("datetime64[ns]")
     df_since_2023["REPORTDATE"] = df_since_2023["USAGEDATE"].dt.strftime("%Y-%m")

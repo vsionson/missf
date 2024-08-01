@@ -92,7 +92,7 @@ def main():
     config = ConfigParser()
     config.read("config.ini")
 
-    if config["datasource"]["source"] == 2:
+    if config["datasource"]["source"] == "2":
         df = load_data2()
     else:
         df = load_data()

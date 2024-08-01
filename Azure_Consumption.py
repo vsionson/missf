@@ -283,7 +283,7 @@ def main():
     config = ConfigParser()
     config.read("config.ini")
 
-    if config["datasource"]["source"] == 2:
+    if config["datasource"]["source"] == "2":
         df_since_2023 = load_data2()
     else:
         df_since_2023 = load_data()

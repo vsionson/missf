@@ -452,10 +452,10 @@ def main():
 
         col1, col2 = st.columns(2)
         with col1:
-            st.header("Holidays in June")
+            st.header("Holidays in " + date.today().strftime("%B"))
             st.dataframe(df_cur[["HOLIDAY", "HOLIDAY_NAME"]], hide_index=True)
         with col2:
-            st.header("Number of Holidays in 2024")
+            st.header("Number of Holidays in " + date.today().strftime("%Y"))
             df_yr = df_holiday.loc[
                 df_holiday["HOLIDAY"].dt.year == datetime.today().year
             ]

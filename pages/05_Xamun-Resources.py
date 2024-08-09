@@ -612,10 +612,6 @@ def main():
         #               FTE Distribution
         #
         #####################################################################
-        product = [
-            "Aevin Earl Molina",
-        ]
-        product.sort()
 
         platform2 = [
             {"Employee": "Allen Christian Tubo", "Remarks": "Full Stack"},
@@ -633,168 +629,215 @@ def main():
                 "Remarks": "Web Dev",
                 "Group": "Xamun Content",
                 "Billable Proj": "",
+                "is_billed": False,
+            },
+            {
+                "Employee": "Aleeza Mae Agulay",
+                "Remarks": "Designer",
+                "Group": "QRI",
+                "Billable Proj": "Xamun Delivery Design",
+                "is_billed": False,
             },
             {
                 "Employee": "Brain Tumibay",
                 "Remarks": "Sr Web/Solution Architect",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS, Karl, Avensys POC",
+                "is_billed": True,
             },
             {
                 "Employee": "Dharyll Jan Calaliman",
                 "Remarks": "Mobile Dev",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
             {
                 "Employee": "Dino Angelo Reyes",
                 "Remarks": "Web Dev",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
             {
                 "Employee": "Dominic Glenn Zabala",
                 "Remarks": "Web Dev",
-                "Group": "Xamun Delivery",
+                "Group": "Xamun Core Support",
                 "Billable Proj": "Smart Pen R&D",
+                "is_billed": False,
             },
             {
                 "Employee": "Eduard Hinunangan",
                 "Remarks": "Web Dev",
-                "Group": "Xamun Delivery",
-                "Billable Proj": "Avensys POC",
+                "Group": "Xamun Core Support",
+                "Billable Proj": "Design Studio",
+                "is_billed": False,
             },
             {
                 "Employee": "Erskine Roy Bornillo",
                 "Remarks": "Jr Backend",
                 "Group": "Xamun Core Support",
                 "Billable Proj": "",
+                "is_billed": False,
+            },
+            {
+                "Employee": "Genevieve Raymundo",
+                "Remarks": "BA",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "WinCredit, Atlas Home, Solviva",
+                "is_billed": False,
             },
             {
                 "Employee": "Glen Ebina",
                 "Remarks": "UI/UX",
                 "Group": "Design",
-                "Billable Proj": "DOON,BPS,ShellPower",
+                "Billable Proj": "BPS,ShellPower",
+                "is_billed": False,
             },
             {
                 "Employee": "Ira Louise David",
                 "Remarks": "Jr Flutter",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
             {
                 "Employee": "Irish Quilla",
                 "Remarks": "PM",
                 "Group": "Xamun Delivery/Swiftloan/Steer",
                 "Billable Proj": "",
+                "is_billed": False,
             },
             {
                 "Employee": "Ivan Joshua Merete",
                 "Remarks": "Web Dev",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
-            # {
-            #     "Employee": "Jean May Alvarez",
-            #     "Remarks": "Mid Flutter",
-            #     "Group": "Xamun Core Support",
-            # },
             {
                 "Employee": "Janicah Lorra Cequeña",
                 "Remarks": "Tester",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "Solviva, Avensys POC, Atlas Home",
+                "is_billed": False,
             },
             {
                 "Employee": "Jansen Neil Olay",
                 "Remarks": "Web Dev",
-                "Group": "Xamun Delivery/Design Studio",
-                "Billable Proj": "",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Design Studio",
+                "is_billed": False,
             },
             {
                 "Employee": "Jayson Echano",
                 "Remarks": "Mobile Dev",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
             {
                 "Employee": "Jessica Joy Angeles",
                 "Remarks": "Tester",
                 "Group": "Xamun Delivery",
-                "Billable Proj": "DOON, Ramcar",
+                "Billable Proj": "Ramcar",
+                "is_billed": False,
             },
             {
                 "Employee": "Jomar Lagunsad",
                 "Remarks": "PM",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "",
+                "is_billed": False,
             },
             {
                 "Employee": "Jomari Munsayac",
                 "Remarks": "Tester",
                 "Group": "QRI",
-                "Billable Proj": "",
+                "Billable Proj": "QRI",
+                "is_billed": False,
             },
             {
                 "Employee": "Joseph Artillaga",
                 "Remarks": "Web Dev",
-                "Group": "Xamun Delivery/Design Studio",
-                "Billable Proj": "",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Design Studio",
+                "is_billed": False,
             },
             {
                 "Employee": "Kevin Paul Merwa",
                 "Remarks": "Jr Backend",
                 "Group": "Xamun Core Support",
                 "Billable Proj": "",
+                "is_billed": False,
             },
             {
                 "Employee": "Krischell Villadulid",
                 "Remarks": "Web Dev",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "Avensys POC",
+                "is_billed": False,
             },
             {
                 "Employee": "Lauren James Leal",
                 "Remarks": "Web Dev",
-                "Group": "Xamun Delivery/Design Studio",
-                "Billable Proj": "Karl Group",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Karl Group, Design Studio",
+                "is_billed": False,
             },
             {
                 "Employee": "Ma. Ethel Yatar",
                 "Remarks": "Sr Tester",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "Karl Group, Shell Group",
+                "is_billed": False,
             },
             {
                 "Employee": "Marc Alvin Villarin ",
                 "Remarks": "Tester",
                 "Group": "Xamun Delivery",
                 "Billable Proj": "BPS, iScan",
+                "is_billed": True,
             },
             {
                 "Employee": "Mark Rayden Mirafuente",
                 "Remarks": "Jr Frontend",
                 "Group": "Xamun Delivery/TMG R&D",
                 "Billable Proj": "",
+                "is_billed": False,
+            },
+            {
+                "Employee": "Michael Dizon",
+                "Remarks": "BA",
+                "Group": "Xamun Delivery",
+                "Billable Proj": "Karl Group, RamCar",
+                "is_billed": False,
             },
             {
                 "Employee": "Noel Guevarra",
                 "Remarks": "Mid Flutter",
                 "Group": "Xamun Delivery/Steer Mobile for Xamun",
                 "Billable Proj": "BPS",
+                "is_billed": True,
             },
             {
                 "Employee": "Raymun Galvez",
                 "Remarks": "Web Dev",
-                "Group": "TMG R&D",
-                "Billable Proj": "",
+                "Group": "TMG",
+                "Billable Proj": "R&D",
+                "is_billed": False,
             },
         ]
 
-        df_xamun_teams2 = (
-            pd.DataFrame(platform2).sort_values(by="Employee").reset_index()
-        )
-        df_xamun_teams2.index += 1
+        #########################################################################
+        #
+        #                    CORE
+        #
+        #########################################################################
+        st.header("Xamun Core")
+
+        df_xamun_core = pd.DataFrame(platform2).sort_values(by="Employee").reset_index()
+        df_xamun_core.index += 1
 
         fig = go.Figure(
             data=[
@@ -823,11 +866,9 @@ def main():
                     ),
                     cells=dict(
                         values=[
-                            # df_core.index,
-                            df_xamun_teams2.index,
-                            df_xamun_teams2.Employee,
-                            df_xamun_teams2.Remarks,
-                            # df_core.Platform,
+                            df_xamun_core.index,
+                            df_xamun_core.Employee,
+                            df_xamun_core.Remarks,
                         ],
                         line_color="darkslategray",
                         fill=dict(
@@ -844,18 +885,26 @@ def main():
                 )
             ]
         )
-        # st.header("FTE Distribution")
         fig.update_layout(height=500)
-        fig.update_layout(title_text="FTE Distribution - Xamun Core")
         st.plotly_chart(fig, use_container_width=True)  # , height=600)
 
+        _df_xamun_rest = pd.DataFrame(the_rest2)
+
+        #########################################################################
+        #
+        #                    BILLED
+        #
+        #########################################################################
+        st.header("Billable Xamun Projects")
+
         is_sorted_by_grp = st.checkbox("Sort by Group?")
-        df_xamun_teams3 = (
-            pd.DataFrame(the_rest2)
+
+        df_xamun_billed = (
+            _df_xamun_rest.loc[(_df_xamun_rest["is_billed"] == True)]
             .sort_values(by=["Group", "Employee"] if is_sorted_by_grp else ["Employee"])
             .reset_index()
         )
-        df_xamun_teams3.index += 1
+        df_xamun_billed.index += 1
 
         fig = go.Figure(
             data=[
@@ -868,7 +917,7 @@ def main():
                             ["<b>Name</b>"],
                             ["<b>Remarks</b>"],
                             ["<b>Group</b>"],
-                            ["<b>Billable Project</b>"],
+                            ["<b>Billed Project</b>"],
                         ],
                         line_color="darkslategray",
                         fill_color="royalblue",
@@ -878,11 +927,73 @@ def main():
                     ),
                     cells=dict(
                         values=[
-                            df_xamun_teams3.index,
-                            df_xamun_teams3.Employee,
-                            df_xamun_teams3.Remarks,
-                            df_xamun_teams3["Group"],
-                            df_xamun_teams3["Billable Proj"],
+                            df_xamun_billed.index,
+                            df_xamun_billed.Employee,
+                            df_xamun_billed.Remarks,
+                            df_xamun_billed["Group"],
+                            df_xamun_billed["Billable Proj"],
+                        ],
+                        line_color="darkslategray",
+                        fill=dict(
+                            color=[
+                                "paleturquoise",
+                                "white",
+                            ]
+                        ),
+                        align=["center", "left", "left", "left"],
+                        # font_size=12,
+                        font=dict(color="black", size=16),
+                        height=30,
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(height=600)
+        st.plotly_chart(fig, use_container_width=True)  # , height=600)
+
+        #########################################################################
+        #
+        #                    BENCH
+        #
+        #########################################################################
+        st.header("Bench")
+
+        is_sorted_by_grp2 = st.checkbox("Sort by Group ?")
+
+        df_xamun_rest = (
+            _df_xamun_rest.loc[(_df_xamun_rest["is_billed"] == False)]
+            .sort_values(
+                by=["Group", "Employee"] if is_sorted_by_grp2 else ["Employee"]
+            )
+            .reset_index()
+        )
+        df_xamun_rest.index += 1
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnorder=[1, 2, 3, 4, 5],
+                    columnwidth=[1, 4, 4, 5, 5],
+                    header=dict(
+                        values=[
+                            ["<b>LINE #</b>"],
+                            ["<b>Name</b>"],
+                            ["<b>Remarks</b>"],
+                            ["<b>Group</b>"],
+                            ["<b>Activities/Tasks</b>"],
+                        ],
+                        line_color="darkslategray",
+                        fill_color="royalblue",
+                        # align=["left", "center"],
+                        font=dict(color="white", size=16),
+                        # height=35,
+                    ),
+                    cells=dict(
+                        values=[
+                            df_xamun_rest.index,
+                            df_xamun_rest.Employee,
+                            df_xamun_rest.Remarks,
+                            df_xamun_rest["Group"],
+                            df_xamun_rest["Billable Proj"],
                         ],
                         line_color="darkslategray",
                         fill=dict(
@@ -900,9 +1011,7 @@ def main():
             ]
         )
 
-        # st.header("The rest")
-        fig.update_layout(height=1200)
-        fig.update_layout(title_text="The Rest")
+        fig.update_layout(height=1000)
         st.plotly_chart(fig, use_container_width=True)  # , height=600)
         #############################################
 

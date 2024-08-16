@@ -19,6 +19,7 @@ XAMUN_PROJS = [
     "Steer Marketplace",
     "ePCSO",
     "AE Project 2 WebUI",
+    "BPS",
 ]
 
 XAMUN_CORE = [
@@ -469,7 +470,7 @@ def main():
             x="EmployeeName",
             y="TotalHrs",
             text_auto=True,
-            title=f"Xamun Core ({_df.EmployeeName.nunique()} FTEs; {total_hrs} hrs)",
+            title=f"Xamun Core/Solutions ({_df.EmployeeName.nunique()} FTEs; {total_hrs} hrs)",
             hover_data=["TotalHrs"],
             # template="ggplot2",
         )

@@ -111,7 +111,26 @@ def main():
         }
     )
 
+    date1 = date.today()
+    date1 = date(date1.year, date1.month, 1) - timedelta(days=1)
+    date1 = date(date1.year, date1.month, 1)
+    date2 = date(date1.year, date1.month, 28) + timedelta(days=4)
+    date2 = date2 - timedelta(days=date2.day)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        date_start = st.date_input("Starting Date", date1)  # pd.Timestamp(2024, 6, 1)
+        date_start = pd.to_datetime(date_start)
+    with col2:
+        date_end = st.date_input("Ending Date", date2)  #  pd.Timestamp(2024, 6, 30)
+        date_end = pd.to_datetime(date_end)
+    with col3:
+        threshhold_applied = st.toggle("Apply threshhold?", True)
+
     df["Period"] = df["Period"].astype("datetime64[ns]")
+
+    # filter out those not within specified date range
+    df = df.loc[(df["Period"] >= date_start) & (df["Period"] <= date_end)]
 
     df["Shortfall"] = df.apply(
         lambda x: 0 if x["ind_eligibility"] == 1 else x["Target"] - x["Billed"], axis=1
@@ -121,27 +140,11 @@ def main():
         axis=1,
     )
 
-    date1 = date.today()
-    date1 = date(date1.year, date1.month, 1) - timedelta(days=1)
-    date1 = date(date1.year, date1.month, 1)
-    date2 = date(date1.year, date1.month, 28) + timedelta(days=4)
-    date2 = date2 - timedelta(days=date2.day)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        date_start = st.date_input("Starting Date", date1)  # pd.Timestamp(2024, 6, 1)
-        date_start = pd.to_datetime(date_start)
-    with col2:
-        date_end = st.date_input("Ending Date", date2)  #  pd.Timestamp(2024, 6, 30)
-        date_end = pd.to_datetime(date_end)
-    with col3:
-        with_threshhold = st.toggle("With threshhold?", True)
-
+    df = df.loc[~(df["Shortfall"]).isna() & (df["Shortfall"] > 0)]
     df_filt = df[
-        (df["Period"] >= date_start)
-        & (df["Period"] <= date_end)
-        & (
-            ((df["ind_eligibility"] == 0.0) & (with_threshhold))
-            | ((df["ind_eligibility"] != 1.0) & (~with_threshhold))
+        (
+            ((df["ind_eligibility"] == 0.0) & (threshhold_applied))
+            | ((df["ind_eligibility"] != 1.0) & (~threshhold_applied))
         )
     ]
 

@@ -47,23 +47,37 @@ def load_data():
     }
     session = Session.builder.configs(connection_parameters).create()
 
-    _df_employee = session.sql("select * from DB_MIS.PUBLIC.EMPLOYEE").to_pandas()
-
+    _df_employee_all = session.sql("select * from DB_MIS.PUBLIC.EMPLOYEE").to_pandas()
     _df_eod = session.sql("select * from DB_MIS.PUBLIC.EOD").to_pandas()
 
     session.close()
 
-    _df_employee = _df_employee.rename(
+    # remove dummy records
+    _df_employee_all = _df_employee_all.loc[(_df_employee_all["COMPANY"] != "DUMMY")]
+
+    _df_employee_all = _df_employee_all.rename(
         columns={
             "EMPLOYEE": "Employee",
             "RESIGNED": "Resigned",
             "LASTDAY": "LastDay",
             "RANK": "Rank",
             "LEVEL": "Level",
-            "START_DATE": "StartDate",
+            "START_DATE": "Start",
             "ACCOUNT": "Account",
+            "GRP2": "GRP2",
+            "COMPANY": "Company",
+            "INCLUDE": "Include",
         }
     )
+    _df_employee = _df_employee_all.loc[
+        :, ["Employee", "Resigned", "LastDay", "Rank", "Level", "Start", "Account"]
+    ]
+
+    _df_employee = _df_employee_all.loc[
+        (_df_employee_all["Include"] == 1), "Employee":"Account"
+    ]
+    _df_employee_all.drop(columns=["Include"], inplace=True)
+
     _df_eod = _df_eod.rename(
         columns={
             "EMPLOYEE": "EmployeeName",
@@ -78,7 +92,7 @@ def load_data():
     )
     _df_eod["Date"] = _df_eod["Date"].astype("datetime64[ns]")
 
-    return _df_employee, _df_eod
+    return _df_employee, _df_eod, _df_employee_all
 
 
 @st.cache_data
@@ -100,7 +114,30 @@ def load_data2():
         lambda x: ((x["Hours"] * 60) + x["Minutes"]) / 60, axis=1
     )
 
-    _df_emp = pd.read_excel(
+    # FTEs
+    # _df_emp = pd.read_excel(
+    #     file_name_billing,
+    #     usecols=[
+    #         "Employee",
+    #         "GRP",
+    #         "Resigned",
+    #         "LastDay",
+    #         "Rank",
+    #         "Level",
+    #         "Start",
+    #         "Account",
+    #         "Include",
+    #     ],
+    #     sheet_name="employees",
+    # )
+    # _df_emp["temp"] = _df_emp["Resigned"].apply(lambda x: True if x == "X" else False)
+    # _df_emp["Resigned"] = _df_emp["temp"]
+
+    # _df_emp = _df_emp.loc[(_df_emp["Include"] == 1)]
+    # _df_emp.drop(columns=["temp", "Include"], inplace=True)
+
+    # all employees
+    _df_emp_all = pd.read_excel(
         file_name_billing,
         usecols=[
             "Employee",
@@ -110,33 +147,27 @@ def load_data2():
             "Rank",
             "Level",
             "Start",
-            "Acct",
+            "Account",
+            "GRP2",
+            "Company",
+            "Include",
         ],
         sheet_name="employees",
     )
-    _df_emp["temp"] = _df_emp["Resigned"].apply(
-        lambda x: True if x == "X" else False, True
-    )
-    _df_emp["Resigned"] = _df_emp["temp"]
-    _df_emp = _df_emp.drop(columns=["temp"])
+    # remove dummy records
+    _df_emp_all = _df_emp_all.loc[(_df_emp_all["Company"] != "DUMMY")]
 
-    _df_emp = _df_emp.loc[
-        (
-            ~_df_emp["Employee"].isin(
-                [
-                    "Conrado Cruz",
-                    "Roy Saberon",
-                    "Samuel Lucas",
-                    "PM",
-                    "SE",
-                    "TE",
-                    "UI",
-                ]
-            ),
-        )
-    ]
-    _df_emp = _df_emp.rename(columns={"Acct": "Account"})
-    return _df_emp, _df_eod
+    # convert "X" to boolean True and blank to False
+    _df_emp_all["temp"] = _df_emp_all["Resigned"].apply(
+        lambda x: True if x == "X" else False
+    )
+    _df_emp_all["Resigned"] = _df_emp_all["temp"]
+    _df_emp_all.drop(columns=["temp"], inplace=True)
+
+    _df_emp = _df_emp_all.loc[(_df_emp_all["Include"] == 1), "Employee":"Account"]
+    _df_emp_all.drop(columns=["Include"], inplace=True)
+
+    return _df_emp, _df_eod, _df_emp_all
 
 
 def main():
@@ -147,6 +178,7 @@ def main():
 
     xamun_container = st.container()
     all_fte_container = st.container()
+    all_emps_container = st.container()
 
     with xamun_container:
 
@@ -168,9 +200,9 @@ def main():
         config.read("config.ini")
 
         if config["datasource"]["source"] == "2":
-            df_emp, df_eod = load_data2()
+            df_emp, df_eod, df_emp_all = load_data2()
         else:
-            df_emp, df_eod = load_data()
+            df_emp, df_eod, df_emp_all = load_data()
 
         # change SwiftLoan into Xamun Solutions
         df_eod.loc[(df_eod["Account"] == "SwiftLoan"), "Account"] = "Xamun Solutions"
@@ -635,32 +667,25 @@ def main():
         ]
 
         the_rest2 = [
-            # {
-            #     "Employee": "Aevin Earl Molina",
-            #     "Remarks": "Web Dev",
-            #     # "Group": "Xamun Delivery",
-            #     "Billable Proj": "Xamun Content",
-            #     "is_billed": False,
-            # },
             {
                 "Employee": "Aleeza Mae Agulay",
                 "Remarks": "Designer",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Xamun Delivery Design, Steer2",
+                "Billable Proj": "Xamun Delivery Design, Steer2, Atlas Home",
                 "is_billed": False,
             },
             {
                 "Employee": "Brain Tumibay",
                 "Remarks": "Sr Web/Solution Architect",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "BPS, Karl, Avensys POC",
+                "Billable Proj": "BPS, Akky, AE Phase 2",
                 "is_billed": False,
             },
             {
                 "Employee": "Dharyll Jan Calaliman",
                 "Remarks": "Mobile Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "BPS",
+                "Billable Proj": "BPS, Akky",
                 "is_billed": False,
             },
             {
@@ -674,21 +699,21 @@ def main():
                 "Employee": "Dominic Glenn Zabala",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Xamun Core Support, Smart Pen R&D",
+                "Billable Proj": "Xamun Core Support",
                 "is_billed": False,
             },
             {
                 "Employee": "Eduard Hinunangan",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Xamun Core Support, Design Studio",
+                "Billable Proj": "Xamun Core Support",
                 "is_billed": False,
             },
             {
-                "Employee": "Eliseo Libarion",
+                "Employee": "Eliseo Libarios",
                 "Remarks": "Sr Full Stack",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "",
+                "Billable Proj": "Dapper Solution, QuickReach v1",
                 "is_billed": False,
             },
             {
@@ -709,7 +734,7 @@ def main():
                 "Employee": "Glen Ebina",
                 "Remarks": "UI/UX",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Design, BPS,ShellPower",
+                "Billable Proj": "Akky, DocScribe",
                 "is_billed": False,
             },
             {
@@ -737,35 +762,35 @@ def main():
                 "Employee": "Janicah Lorra Cequeña",
                 "Remarks": "Tester",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Solviva, Avensys POC, Atlas Home",
+                "Billable Proj": "WinCredit, Atlas Home, AE Phase 2",
                 "is_billed": False,
             },
             {
                 "Employee": "Jansen Neil Olay",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Design Studio",
+                "Billable Proj": "Xamun Core Support",
                 "is_billed": False,
             },
             {
                 "Employee": "Jayson Echano",
                 "Remarks": "Mobile Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "BPS",
+                "Billable Proj": "BPS, AE Phase 2",
                 "is_billed": False,
             },
             {
                 "Employee": "Jessica Joy Angeles",
                 "Remarks": "Tester",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Ramcar",
+                "Billable Proj": "BPS, DocScribe",
                 "is_billed": False,
             },
             {
                 "Employee": "Jomar Lagunsad",
                 "Remarks": "PM",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Project Management",
+                "Billable Proj": "Xamun Delivery PM",
                 "is_billed": True,
             },
             {
@@ -779,7 +804,7 @@ def main():
                 "Employee": "Joseph Artillaga",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Design Studio",
+                "Billable Proj": "Xamun Core Support",
                 "is_billed": False,
             },
             {
@@ -800,14 +825,14 @@ def main():
                 "Employee": "Lauren James Leal",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Karl Group, Design Studio",
+                "Billable Proj": "Akky",
                 "is_billed": False,
             },
             {
                 "Employee": "Ma. Ethel Yatar",
                 "Remarks": "Sr Tester",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Karl Group, Shell Group",
+                "Billable Proj": "Xamun Delivery, Akky",
                 "is_billed": False,
             },
             {
@@ -828,14 +853,14 @@ def main():
                 "Employee": "Michael Dizon",
                 "Remarks": "BA",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Karl Group, RamCar",
+                "Billable Proj": "Concrete Consulting",
                 "is_billed": False,
             },
             {
                 "Employee": "Noel Guevarra",
                 "Remarks": "Mid Flutter",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "BPS, Steer Mobile for Xamun",
+                "Billable Proj": "BPS/Akky/ AE Phase 2",
                 "is_billed": False,
             },
             {
@@ -1099,7 +1124,11 @@ def main():
         ]
         df_emp_copy["Account"] = df_emp_copy["Account"].fillna("nan")
         acct_list = df_emp_copy["Account"].unique().tolist()
-        acct_list.sort()
+        try:
+            acct_list.sort()
+        except:
+            pass
+
         selected_accts = st.multiselect("Account", options=acct_list, default=acct_list)
 
         if is_active or is_resigned:
@@ -1117,6 +1146,58 @@ def main():
             )
         else:
             st.dataframe(None)
+
+    with all_emps_container:
+        st.header("All Employees")
+        is_active2 = st.checkbox("Active", value=True, key=3)
+        is_resigned2 = st.checkbox("Resigned", value=False, key=4)
+
+        df_emp_all_copy = df_emp_all.loc[
+            (
+                (df_emp_all["Resigned"] != is_active2)
+                | (df_emp_all["Resigned"] == is_resigned2)
+            )
+        ]
+        df_emp_all_copy["Account"] = df_emp_all_copy["Account"].fillna("nan")
+
+        company_list = df_emp_all_copy["Company"].unique().tolist()
+        try:
+            company_list.sort()
+        except:
+            pass
+
+        selected_companies = st.multiselect(
+            "Company", options=company_list, default=company_list
+        )
+        df_emp_all_copy = df_emp_all_copy.loc[
+            (df_emp_all_copy["Company"].isin(selected_companies))
+        ]
+
+        grp2_list = df_emp_all_copy["GRP2"].unique().tolist()
+        try:
+            grp2_list.sort()
+        except:
+            pass
+
+        selected_grp2 = st.multiselect("GRP2", options=grp2_list, default=grp2_list)
+
+        if is_active2 or is_resigned2:
+            st.dataframe(
+                df_emp_all_copy.loc[
+                    # (
+                    #     (df_emp_all["RESIGNED"] != is_active2)
+                    #     | (df_emp_all["RESIGNED"] == is_resigned2)
+                    # ) &
+                    (df_emp_all["Company"].isin(selected_companies))
+                    & (df_emp_all["GRP2"].isin(selected_grp2))
+                ],
+                width=900,
+                height=600,
+                hide_index=True,
+            )
+        else:
+            st.dataframe(None)
+
     return None
 
 

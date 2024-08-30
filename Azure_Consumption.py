@@ -505,7 +505,7 @@ def main():
             #
             ###########################################################
 
-            st.header("Average per Month")
+            st.header("Monthly Daily Average")
 
             arr_arr = []
             for i in range(0, 4):

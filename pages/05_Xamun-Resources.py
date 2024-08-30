@@ -713,7 +713,7 @@ def main():
                 "Employee": "Eliseo Libarios",
                 "Remarks": "Sr Full Stack",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Dapper Solution, QuickReach v1",
+                "Billable Proj": "Debugging, Migration, R&D",
                 "is_billed": False,
             },
             {
@@ -734,7 +734,7 @@ def main():
                 "Employee": "Glen Ebina",
                 "Remarks": "UI/UX",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Akky, DocScribe",
+                "Billable Proj": "Akky, DocScribe, WinCredit",
                 "is_billed": False,
             },
             {
@@ -797,7 +797,7 @@ def main():
                 "Employee": "Jomari Munsayac",
                 "Remarks": "Tester",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Steer2",
+                "Billable Proj": "Steer2, Eon Pharma, Concrete Consulting",
                 "is_billed": False,
             },
             {
@@ -818,21 +818,21 @@ def main():
                 "Employee": "Krischell Villadulid",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Avensys POC",
+                "Billable Proj": "Akky, Xamun Core Support",
                 "is_billed": False,
             },
             {
                 "Employee": "Lauren James Leal",
                 "Remarks": "Web Dev",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Akky",
+                "Billable Proj": "Akky, Xamun Core Support",
                 "is_billed": False,
             },
             {
                 "Employee": "Ma. Ethel Yatar",
                 "Remarks": "Sr Tester",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Xamun Delivery, Akky",
+                "Billable Proj": "Xamun Delivery, Akky, Kit Sumabat",
                 "is_billed": False,
             },
             {
@@ -853,14 +853,14 @@ def main():
                 "Employee": "Michael Dizon",
                 "Remarks": "BA",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "Concrete Consulting",
+                "Billable Proj": "Concrete Consulting, Eon Pharma",
                 "is_billed": False,
             },
             {
                 "Employee": "Noel Guevarra",
                 "Remarks": "Mid Flutter",
                 # "Group": "Xamun Delivery",
-                "Billable Proj": "BPS/Akky/ AE Phase 2",
+                "Billable Proj": "BPS, Akky, AE Phase 2",
                 "is_billed": False,
             },
             {
@@ -1133,17 +1133,13 @@ def main():
 
         if is_active or is_resigned:
             st.dataframe(
-                df_emp_copy.loc[
-                    # (
-                    #     (df_emp["RESIGNED"] != is_active)
-                    #     | (df_emp["RESIGNED"] == is_resigned)
-                    # ) &
-                    (df_emp["Account"].isin(selected_accts))
-                ],
+                df_emp_copy.loc[(df_emp["Account"].isin(selected_accts))],
                 width=900,
                 height=600,
                 hide_index=True,
             )
+            cnt: int = len(df_emp_copy.loc[(df_emp["Account"].isin(selected_accts))])
+            st.write(f"Count: {cnt}")
         else:
             st.dataframe(None)
 
@@ -1184,10 +1180,6 @@ def main():
         if is_active2 or is_resigned2:
             st.dataframe(
                 df_emp_all_copy.loc[
-                    # (
-                    #     (df_emp_all["RESIGNED"] != is_active2)
-                    #     | (df_emp_all["RESIGNED"] == is_resigned2)
-                    # ) &
                     (df_emp_all["Company"].isin(selected_companies))
                     & (df_emp_all["GRP2"].isin(selected_grp2))
                 ],
@@ -1195,6 +1187,13 @@ def main():
                 height=600,
                 hide_index=True,
             )
+            cnt: int = len(
+                df_emp_all_copy.loc[
+                    (df_emp_all["Company"].isin(selected_companies))
+                    & (df_emp_all["GRP2"].isin(selected_grp2))
+                ]
+            )
+            st.write(f"Count: {cnt}")
         else:
             st.dataframe(None)
 

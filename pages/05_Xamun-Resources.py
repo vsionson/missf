@@ -653,8 +653,8 @@ def main():
         #####################################################################
 
         core = [
-            {"Employee": "Allen Christian Tubo", "Remarks": "Full Stack"},
-            {"Employee": "Avik Das", "Remarks": "Full Stack"},
+            {"Employee": "Allen Christian Tubo", "Remarks": "Jr. Full Stack"},
+            {"Employee": "Avik Das", "Remarks": "Sr. Full Stack"},
             {"Employee": "Cyrill Binaohan", "Remarks": "TL"},
             {"Employee": "John Aldrich Callado", "Remarks": "Sr. Flutter"},
             {"Employee": "Sarah Jane Rosales", "Remarks": "Tester"},
@@ -744,13 +744,6 @@ def main():
                 "Billable Proj": "BPS",
                 "is_billed": True,
             },
-            # {
-            #     "Employee": "Irish Quilla",
-            #     "Remarks": "PM",
-            #     # "Group": "Xamun Delivery",
-            #     "Billable Proj": "Swiftloan, Steer",
-            #     "is_billed": False,
-            # },
             {
                 "Employee": "Ivan Joshua Merete",
                 "Remarks": "Web Dev",
@@ -809,7 +802,7 @@ def main():
             },
             {
                 "Employee": "Kevin Paul Merwa",
-                "Remarks": "Jr Backend",
+                "Remarks": "Jr Full Stack",
                 # "Group": "Xamun Delivery",
                 "Billable Proj": "Xamun Core Support",
                 "is_billed": False,
@@ -823,7 +816,7 @@ def main():
             },
             {
                 "Employee": "Lauren James Leal",
-                "Remarks": "Web Dev",
+                "Remarks": "Backend",
                 # "Group": "Xamun Delivery",
                 "Billable Proj": "Akky, Xamun Core Support",
                 "is_billed": False,

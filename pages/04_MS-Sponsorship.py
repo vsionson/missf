@@ -1,73 +1,102 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from check_pwd import check_password
+from configparser import ConfigParser
+from pathlib import Path
+from datetime import datetime
 
+
+@st.cache_data
+def load_data2():
+    # config = ConfigParser()
+    # config.read("config.ini")
+    # path = config["sponsorship"]["path"]
+    path = st.secrets.sponsorshipnoel.path
+
+    def load_monthly(file):
+        df: pd.DataFrame = pd.read_csv(
+            file,
+        )
+        return df
+
+    # arr = sorted(Path(path).glob("* 2024-*.csv"))
+    arr = sorted(Path(path).glob("BAI Azure Sponsorship - Aug 1 to Oct 10 2024.csv"))
+    arr_df = [load_monthly(el) for el in arr]
+    df = pd.concat(arr_df).loc[:,["Date", "ServiceName", "ServiceType", "ServiceResource", "Cost"]]
+
+    return df
 
 def main():
 
-    if not check_password():
-        st.stop()  # Do not continue if check_password is not True.
+    st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
-    st.title(":bar_chart: Microsoft Azure Sponsorship")
+    st.title(":bar_chart: 12K Microsoft Azure Sponsorship")
 
     sponsor_container = st.container()
+
+    df = load_data2()
+    df["Date"] = df["Date"].astype("datetime64[ns]")
+    df["ReportDate"] = df["Date"].dt.strftime("%Y-%m")
+
+    df3 = df.groupby(["ServiceName"], as_index=False).agg({"Cost": "sum"})
+    df4 = df.groupby(["ServiceResource"], as_index=False).agg({"Cost": "sum"})
+
     with sponsor_container:
 
-        df_spons = pd.DataFrame(
-            [
-                ["Aug 5-Sep 4", 761],
-                ["Sep 5-Oct 4", 1022],
-                ["Oct 5-Nov 4", 1091],
-                ["Nov 5-Dec 4", 1069],
-                ["Dec 5-Jan 4", 1819],
-                ["Jan 5-Feb 4", 1455],
-                ["Feb 5-Mar 4", 1325],
-                ["Mar 5-Apr 4", 1322],
-                ["Apr 5-May 4", 1520],
-            ],
-            columns=["Period", "Monthly"],
+        # monthly cost
+        fig = px.bar(
+            df.groupby(pd.Grouper(key="Date", freq="ME")).agg({"Cost": "sum"}).reset_index(),
+            x="Date",
+            y="Cost",
+            text_auto=True,
+            template="seaborn",
+            opacity=0.89,
+            title="Monthly Cost",
         )
-
-        df_spons["Variance"] = df_spons["Monthly"].pct_change(1) * 100
-
-        fig = px.line(
-            df_spons,
-            x="Period",
-            y="Monthly",
-            template="ggplot2",
-            title="BAI MS Sponsorship",
-            text=["${:,.2f}".format(x) for x in df_spons["Monthly"]],
-        )
-        fig.update_traces(textposition="top center", textfont=dict(color="blue"))
-        fig.update_layout(font=dict(size=14))
+        fig.update_traces(texttemplate="%{y:,.2f}")
+        fig.update_layout(bargap=0.2)
         st.plotly_chart(fig, use_container_width=True, height=200)
 
-        st.divider()
-        st.image(
-            "./pages/BAI_sponsorship.jpg",
-            caption="Sponsorship Monitoring",
+        total_cost: float = df["Cost"].sum()
+        max_date: datetime = df["Date"].max().strftime("%b %-d, %Y")
+
+        # st.write(f"Running Total: {total_cost}")
+        st.write("Running Total: $ {0:,.2f} as of {1}".format(total_cost, max_date))
+
+
+        # running total by ServiceName
+        fig = px.bar(
+            df.groupby(["ServiceName"], as_index=False).agg({"Cost": "sum"}),
+            # df3,
+            x="ServiceName",
+            y="Cost",
+            text_auto=True,
+            template="seaborn",
+            opacity=0.89,
+            title="Running Cost By Service",
         )
+        fig.update_traces(texttemplate="%{y:,.2f}")
+        fig.update_layout(bargap=0.2)
+        st.plotly_chart(fig, use_container_width=True, height=200)
 
-        # fig, ax = plt.subplots(figsize=(12, 4))
-        # cont = ax.bar(
-        #     df_spons["Period"].to_numpy(),
-        #     df_spons["Monthly"].to_numpy(),
-        #     width=0.5,
-        #     label=df_spons["Monthly"].to_numpy(),
-        # )
-        # ax.set_title("BAI MS Sponsorship")
-        # ax.bar_label(cont, color="white", label_type="center", fmt="{:,.0f}")
-        # st.pyplot(fig)
-        # st.dataframe(df_spons, use_container_width=True)
 
-        # p = so.Plot(df_spons, x="Period", y="Monthly").add(so.Bar(width=0.5))
-        # p.label(title="BAI MS Sponsorship")
-        # f4 = plt.figure()
-        # p.on(f4).show()
-        # st.pyplot(f4, use_container_width=True)
+        # running total by ServiceResource
+        fig = px.bar(
+            df.groupby(["ServiceResource"], as_index=False).agg({"Cost": "sum"}),
+            # df4,
+            x="ServiceResource",
+            y="Cost",
+            text_auto=True,
+            template="seaborn",
+            opacity=0.89,
+            title="Running Cost By Resource",
+        )
+        fig.update_traces(texttemplate="%{y:,.2f}")
+        fig.update_layout(bargap=0.2)
+        st.plotly_chart(fig, use_container_width=True, height=200)
+
     return None
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+main()

@@ -5,7 +5,6 @@ import numpy as np
 from snowflake.snowpark import Session
 from pathlib import Path
 from configparser import ConfigParser
-from check_pwd import check_password
 from datetime import date, timedelta
 
 
@@ -37,9 +36,10 @@ def load_data():
 
 @st.cache_data
 def load_data2():
-    config = ConfigParser()
-    config.read("config.ini")
-    file_name = Path(config["billing"]["path"]) / "Billing v3.0.xlsx"
+    # config = ConfigParser()
+    # config.read("config.ini")
+    # file_name = Path(config["billing"]["path"]) / "Billing v3.0.xlsx"
+    file_name = Path(st.secrets.billing.path) / "Billing v3.0.xlsx"
     # sales/rates
     cols = [
         "Employee",
@@ -84,15 +84,16 @@ def load_data2():
 
 
 def main():
-    if not check_password():
-        st.stop()  # Do not continue if check_password is not True.
+
+    st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
     st.title(":bar_chart: Lost Opportunities")
 
-    config = ConfigParser()
-    config.read("config.ini")
+    # config = ConfigParser()
+    # config.read("config.ini")
 
-    if config["datasource"]["source"] == "2":
+    # if config["datasource"]["source"] == "2":
+    if st.secrets.datasource.source == 2:
         df = load_data2()
     else:
         df = load_data()
@@ -143,8 +144,8 @@ def main():
     df = df.loc[~(df["Shortfall"]).isna() & (df["Shortfall"] > 0)]
     df_filt = df[
         (
-            ((df["ind_eligibility"] == 0.0) & (threshhold_applied))
-            | ((df["ind_eligibility"] != 1.0) & (~threshhold_applied))
+                ((df["ind_eligibility"] == 0.0) & (threshhold_applied))
+                | ((df["ind_eligibility"] != 1.0) & (~threshhold_applied))
         )
     ]
 
@@ -165,19 +166,19 @@ def main():
         df_filt["Month"] = pd.to_datetime(df_filt.Period).dt.strftime("%Y-%m-%d")
         st.dataframe(
             df_filt.loc[
-                :,
-                [
-                    "Project",
-                    "Employee",
-                    "Rank",
-                    "Level",
-                    "Month",
-                    "Target",
-                    "Billed",
-                    "Shortfall",
-                    "ShortfallAmt",
-                    # "ind_eligibility",
-                ],
+            :,
+            [
+                "Project",
+                "Employee",
+                "Rank",
+                "Level",
+                "Month",
+                "Target",
+                "Billed",
+                "Shortfall",
+                "ShortfallAmt",
+                # "ind_eligibility",
+            ],
             ].sort_values(["Project", "Employee"]),
             hide_index=True,
         )
@@ -188,8 +189,8 @@ def main():
                 st.dataframe(
                     df.loc[
                         (
-                            ((df["ind_eligibility"] == 0.0) & (with_threshhold))
-                            | ((df["ind_eligibility"] != 1.0) & (~with_threshhold))
+                                ((df["ind_eligibility"] == 0.0) & (with_threshhold))
+                                | ((df["ind_eligibility"] != 1.0) & (~with_threshhold))
                         ),
                         [
                             "Project",
@@ -213,5 +214,5 @@ def main():
     return None
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+main()

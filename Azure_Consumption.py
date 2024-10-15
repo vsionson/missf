@@ -28,11 +28,11 @@ from datetime import datetime, date, timedelta
 import plotly.express as px
 from pathlib import Path
 from snowflake.snowpark import Session
+
 import snowflake.snowpark as snowpark
 from configparser import ConfigParser
 import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities.hasher import Hasher
-from check_pwd import check_password
 
 
 @st.cache_data
@@ -59,9 +59,10 @@ def load_data():
 
 @st.cache_data
 def load_data2():
-    config = ConfigParser()
-    config.read("config.ini")
-    path = config["azure"]["path"]
+    # config = ConfigParser()
+    # config.read("config.ini")
+    # path = config["azure"]["path"]
+    path = st.secrets.azure.path
 
     def load_monthly(file):
         _df = pd.read_excel(
@@ -78,7 +79,7 @@ def load_data2():
         _df.loc[_df.Subscription != "Beta", "Subscription"] = "Production"
         return _df
 
-    arr = sorted(Path(path).glob("*2024-*.xlsx"))
+    arr = sorted(Path(path).glob("Azure Usage 2024-*.xlsx"))
     arr_df = [load_monthly(el) for el in arr]
 
     file_name = Path(path) / "Azure Usage Jan to Dec 2023.xlsx"
@@ -223,6 +224,7 @@ def chart_top_consumers(type, df, arr_dates):
 
 
 def main():
+    st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
     def chart_beta_vs_prod(category):
         st.header(category)
@@ -268,22 +270,14 @@ def main():
             st.plotly_chart(fig, use_container_width=True, height=height)
         return None
 
-    st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
-
-    #########################################
-
-    if not check_password():
-        st.stop()  # Do not continue if check_password is not True.
-
-    # Main Streamlit app starts here
-    #########################################
 
     st.title(":bar_chart: QuickReach Azure Consumption")
 
-    config = ConfigParser()
-    config.read("config.ini")
+    # config = ConfigParser()
+    # config.read("config.ini")
 
-    if config["datasource"]["source"] == "2":
+    # if config["datasource"]["source"] == "2":
+    if st.secrets.datasource.source == 2:
         df_since_2023 = load_data2()
     else:
         df_since_2023 = load_data()
@@ -332,7 +326,7 @@ def main():
         #     title="Monthly Cost",
         # )
         fig = px.bar(
-            df_since_2023.groupby(["REPORTDATE"], as_index=False).agg({"COST": sum}),
+            df_since_2023.groupby(["REPORTDATE"], as_index=False).agg({"COST": "sum"}),
             x="REPORTDATE",
             y="COST",
             text_auto=True,
@@ -473,7 +467,7 @@ def main():
             df.CATEGORY = df.CATEGORY.cat.set_categories(sorter)
 
             df = (
-                df.groupby(["SUBSCRIPTION", "CATEGORY", "USAGEDATE"], as_index=False)
+                df.groupby(["SUBSCRIPTION", "CATEGORY", "USAGEDATE"], as_index=False, observed=False)
                 .COST.sum()
                 .sort_values(["CATEGORY", "USAGEDATE"])
             )
@@ -557,8 +551,11 @@ def main():
 
             # get the lastest total amount
             current_total = df_since_2023.groupby(
-                pd.Grouper(key="USAGEDATE", freq="1M")
-            ).sum()["COST"][-1]
+                pd.Grouper(key="USAGEDATE", freq="1ME")
+            ).sum()["COST"].iloc[-1]
+            # current_total = df_since_2023.groupby(
+            #     pd.Grouper(key="USAGEDATE", freq="1ME")
+            # ).sum()["COST"][-1]
 
             remaining_days = remaining_days_of_the_month(dt2)
 
@@ -721,5 +718,5 @@ def main():
     return None
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+main()

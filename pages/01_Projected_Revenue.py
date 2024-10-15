@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 from snowflake.snowpark import Session
 from configparser import ConfigParser
 from pathlib import Path
-from check_pwd import check_password
 
 
 @st.cache_data
@@ -44,9 +43,9 @@ def load_data():
 
 @st.cache_data
 def load_data2():
-    config = ConfigParser()
-    config.read("config.ini")
-    path = config["billing"]["path"]
+    # config = ConfigParser()
+    # config.read("config.ini")
+    path = st.secrets.billing.path # config["billing"]["path"]
     file_name_billing = Path(path) / "Billing v3.0.xlsx"
     file_name_invoice = Path(path) / "BAI Collections as of date.xlsx"
 
@@ -231,11 +230,11 @@ def billable_hrs(df_rates):
 
 def okr(df):
     df_inv = df.groupby(["INV_YR", "INV_MON", "TX_TYPE"], as_index=False).agg(
-        {"INV_AMOUNT": sum}
+        {"INV_AMOUNT": "sum"}
     )
     df_payment = df.groupby(
         ["PAYMENT_YR", "PAYMENT_MON", "TX_TYPE"], as_index=False
-    ).agg({"PAYMENT_AMOUNT": sum})
+    ).agg({"PAYMENT_AMOUNT": "sum"})
 
     piv_inv = pd.pivot_table(
         data=df_inv, values="INV_AMOUNT", columns="TX_TYPE", index=["INV_MON"]
@@ -435,8 +434,8 @@ def okr(df):
 
 
 def main():
-    if not check_password():
-        st.stop()  # Do not continue if check_password is not True.
+
+    st.set_page_config(page_title="MIS Report", page_icon=":bar_chart:", layout="wide")
 
     st.title(":bar_chart: Projected Revenue")
 
@@ -447,23 +446,24 @@ def main():
         df_cur = df_holiday.loc[
             (df_holiday["HOLIDAY"].dt.year == datetime.today().year)
             & (df_holiday["HOLIDAY"].dt.month == datetime.today().month)
-        ]
-        df_cur["HOLIDAY"] = df_holiday["HOLIDAY"].dt.strftime("%Y-%m-%d")
+            ]
+        df_cur["HOLIDAY"] = df_cur["HOLIDAY"].dt.strftime("%Y-%m-%d")
 
         col1, col2 = st.columns(2)
         with col1:
-            st.header("Holidays in " + date.today().strftime("%B"))
-            st.dataframe(df_cur[["HOLIDAY", "HOLIDAY_NAME"]], hide_index=True)
-        with col2:
             st.header("Number of Holidays in " + date.today().strftime("%Y"))
             df_yr = df_holiday.loc[
                 df_holiday["HOLIDAY"].dt.year == datetime.today().year
-            ]
+                ]
 
             df_yr2 = df_yr.groupby(["YYYYMM"], as_index=False).agg(
                 Holidays=("YYYYMM", "count")
             )
             st.dataframe(df_yr2[["YYYYMM", "Holidays"]], hide_index=True)
+        with col2:
+            if len(df_cur) > 0:
+                st.header("Holidays in " + date.today().strftime("%B"))
+                st.dataframe(df_cur[["HOLIDAY", "HOLIDAY_NAME"]], hide_index=True)
 
         return None
 
@@ -475,10 +475,10 @@ def main():
                 "Starting Date", pd.Timestamp(2024, 1, 1)
             ).strftime("%Y%m%d")
 
-        config = ConfigParser()
-        config.read("config.ini")
+        # config = ConfigParser()
+        # config.read("config.ini")
 
-        if config["datasource"]["source"] == "2":
+        if st.secrets.datasource.source == 2: # config["datasource"]["source"] == "2":
             df_rates, df_holiday, df_invoice = load_data2()
         else:
             df_rates, df_holiday, df_invoice = load_data()
@@ -486,13 +486,13 @@ def main():
         df_invoice = df_invoice.loc[
             (df_invoice["INV_YR"] >= 2024)
             & ~(
-                (
-                    (df_invoice["INV_AMOUNT"] == 33333.34)
-                    | (df_invoice["INV_AMOUNT"] == 70901.49)
-                )
-                & (df_invoice["CLIENT"] == "Technology Integration Group")
+                    (
+                            (df_invoice["INV_AMOUNT"] == 33333.34)
+                            | (df_invoice["INV_AMOUNT"] == 70901.49)
+                    )
+                    & (df_invoice["CLIENT"] == "Technology Integration Group")
             )
-        ]
+            ]
         df_rates = df_rates.query("PERIOD >= @date_start")
         df_rates["Billable"] = df_rates["TARGET"] * df_rates["INIT_RATE"]
         df_rates["LossHrs"] = df_rates["TARGET"] - df_rates["BILLED"]
@@ -513,5 +513,5 @@ def main():
     return None
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+main()

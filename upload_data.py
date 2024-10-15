@@ -1,7 +1,7 @@
 import pandas as pd
 from snowflake.snowpark import Session
-import snowflake.snowpark as snowpark
-from snowflake.snowpark.functions import col
+# import snowflake.snowpark as snowpark
+# from snowflake.snowpark.functions import col
 import streamlit as st
 
 
@@ -79,7 +79,6 @@ FILE_NAME = {
         "/Users/shaun/projects/mis/data/csv/eod.csv",
         "@db_mis.public.eod",
     ),
-    "Y": (1, 2, 3, 4),
 }
 
 
